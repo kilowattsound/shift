@@ -1495,14 +1495,14 @@
             top: 0;
             right: 0;
             bottom: 0;
-            width: 80px;
+            width: 50%;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
             z-index: 1;
             /* Explicitly behind the shift item */
             background-color: var(--warning);
-            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            border-radius: 0;
         }
 
         .swipe-background-edit {
@@ -1510,14 +1510,14 @@
             top: 0;
             left: 0;
             bottom: 0;
-            width: 80px;
+            width: 50%;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             z-index: 1;
             /* Explicitly behind the shift item */
             background-color: var(--primary);
-            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            border-radius: 0;
         }
 
         .btn-delete-swipe,
@@ -1531,7 +1531,7 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            width: 100%;
+            width: 80px;
             height: 100%;
             cursor: pointer;
             padding: 0;
