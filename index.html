@@ -2730,8 +2730,8 @@
                 if (yearShifts.length === 0) {
                     return {
                         months: {},
-                        totalShifts: 0,
-                        totalPaid: 0,
+                        shifts: 0,
+                        paid: 0,
                         averageDaily: 0
                     };
                 }
@@ -2787,8 +2787,8 @@
 
                 return {
                     months: monthsData,
-                    totalShifts: yearShifts.length,
-                    totalPaid: totalPaid,
+                    shifts: yearShifts.length,
+                    paid: totalPaid,
                     averageDaily: averageDaily
                 };
             }
