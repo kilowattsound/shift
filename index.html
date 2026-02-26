@@ -33,8 +33,11 @@
             --border-color: #e9ecef;
             --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --border-radius: 16px;
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
 
             --base-size: 16px;
             --font-xs: 0.75rem;
@@ -69,6 +72,9 @@
             --accent: #a78bfa;
             --today: #f59e0b;
             --danger: #ef4444;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.25);
         }
 
         .professional-theme {
@@ -83,6 +89,9 @@
             --accent: #7c3aed;
             --today: #d97706;
             --danger: #dc2626;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.05);
         }
 
         * {
@@ -126,6 +135,7 @@
             font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.5px;
         }
@@ -217,10 +227,13 @@
             align-items: center;
             margin-bottom: var(--spacing-sm);
             padding: var(--spacing-sm);
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
             border-left: 4px solid var(--primary);
+            border-radius: var(--border-radius);
+            box-shadow: var(--glass-shadow);
         }
 
         .week-title {
@@ -280,11 +293,15 @@
             align-items: flex-start;
             padding: var(--spacing-sm);
             border-radius: var(--border-radius);
-            background-color: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             transition: var(--transition);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--glass-border);
             gap: var(--spacing-sm);
-            box-shadow: var(--shadow);
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
         }
 
         .shift-date-container {
@@ -376,6 +393,7 @@
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             line-height: 1.3;
         }
@@ -625,12 +643,15 @@
 
         /* СТИЛИ ДЛЯ SUMMARY */
         .summary-card {
-            background-color: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--success);
             border-radius: var(--border-radius);
             padding: var(--spacing-md);
             margin-bottom: var(--spacing-sm);
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--success);
+            box-shadow: var(--glass-shadow);
         }
 
         .summary-header {
@@ -1133,15 +1154,18 @@
         }
 
         .shift-card {
-            background-color: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--primary);
             border-radius: var(--border-radius);
             padding: 15px;
             margin-bottom: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--glass-shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 4px solid var(--primary);
             transition: transform 0.2s, box-shadow 0.2s;
             animation: slideIn 0.3s ease-out;
         }
@@ -1251,12 +1275,14 @@
         }
 
         .day-details-card {
-            background-color: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--border-radius);
             padding: var(--spacing-md);
             margin-bottom: var(--spacing-md);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
             display: none;
         }
 
@@ -1305,9 +1331,14 @@
         .day-shift-item {
             padding: var(--spacing-sm);
             border-radius: var(--border-radius);
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
             margin-bottom: var(--spacing-xs);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
         }
 
         .day-shift-project {
@@ -1344,12 +1375,16 @@
             justify-content: space-between;
             align-items: center;
             padding: var(--spacing-sm);
-            background-color: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--accent);
             border-radius: var(--border-radius);
             margin-bottom: var(--spacing-xs);
-            border-left: 4px solid var(--accent);
             cursor: pointer;
             transition: var(--transition);
+            box-shadow: var(--glass-shadow);
         }
 
         .year-month-header:hover {
@@ -1402,8 +1437,13 @@
 
         /* Стили для All Time Summary */
         .all-time-summary {
-            background: linear-gradient(135deg, rgba(114, 9, 183, 0.1), rgba(67, 97, 238, 0.1));
+            background: linear-gradient(135deg, rgba(114, 9, 183, 0.15), rgba(67, 97, 238, 0.15));
             border-left: 4px solid var(--accent);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--glass-border);
+            border-right: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .all-time-summary .summary-title {
@@ -1483,8 +1523,6 @@
             transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
             width: 100%;
             /* Ensure it covers the background fully */
-            background-color: var(--card-bg);
-            /* Enforce solid background to hide delete button properly */
             user-select: none;
             -webkit-user-select: none;
             touch-action: pan-y;
@@ -1503,6 +1541,8 @@
             /* Explicitly behind the shift item */
             background-color: var(--warning);
             border-radius: 0;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
 
         .swipe-background-edit {
@@ -1518,6 +1558,15 @@
             /* Explicitly behind the shift item */
             background-color: var(--primary);
             border-radius: 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .swipeable-container.is-swiping .swipe-background,
+        .swipeable-container.is-swiping .swipe-background-edit,
+        .swipeable-container.swipe-open .swipe-background,
+        .swipeable-container.swipe-open .swipe-background-edit {
+            opacity: 1;
         }
 
         .btn-delete-swipe,
@@ -1656,12 +1705,15 @@
         }
 
         .toast {
-            background-color: var(--card-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--primary);
             color: var(--text-color);
             padding: 12px 16px;
             border-radius: var(--border-radius);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            border-left: 4px solid var(--primary);
+            box-shadow: var(--glass-shadow);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -1790,28 +1842,7 @@
         </div>
 
         <div id="summaryTab" class="tab-content" style="display: none;">
-            <!-- Filters & Charts -->
-            <details class="summary-card" open
-                style="margin-bottom: var(--spacing-md); padding: var(--spacing-md); cursor: pointer;">
-                <summary class="summary-title"
-                    style="margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                    Analytics & Filters
-                    <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
-                </summary>
-                <div style="cursor: default; margin-top: 15px;">
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <select id="summaryFilterProject" class="input-field" style="flex: 1;">
-                            <option value="All">All Projects</option>
-                        </select>
-                        <select id="summaryFilterTask" class="input-field" style="flex: 1;">
-                            <option value="All">All Tasks</option>
-                        </select>
-                    </div>
-                    <div style="position: relative; height: 250px; width: 100%;">
-                        <canvas id="earningsChart"></canvas>
-                    </div>
-                </div>
-            </details>
+
 
             <button class="btn btn-outline unpaid-shifts-btn" id="unpaidShiftsBtn">
                 <i class="fas fa-money-bill-wave"></i> Show Unpaid Shifts
@@ -1907,6 +1938,29 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Filters & Charts -->
+            <details class="summary-card"
+                style="margin-bottom: var(--spacing-md); padding: var(--spacing-md); cursor: pointer;">
+                <summary class="summary-title"
+                    style="margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                    Analytics & Filters
+                    <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
+                </summary>
+                <div style="cursor: default; margin-top: 15px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <select id="summaryFilterProject" class="input-field" style="flex: 1;">
+                            <option value="All">All Projects</option>
+                        </select>
+                        <select id="summaryFilterTask" class="input-field" style="flex: 1;">
+                            <option value="All">All Tasks</option>
+                        </select>
+                    </div>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="earningsChart"></canvas>
+                    </div>
+                </div>
+            </details>
         </div>
 
         <div class="app-version">
@@ -4635,6 +4689,7 @@
                         // Close previously open swipe if tapping somewhere else
                         if (activeSwipeElement && activeSwipeElement !== swipeable) {
                             activeSwipeElement.style.transform = `translateX(0px)`;
+                            activeSwipeElement.parentNode.classList.remove('swipe-open', 'is-swiping');
                         }
 
                         startX = e.touches[0].clientX;
@@ -4645,6 +4700,7 @@
                     } else if (activeSwipeElement) {
                         // Tapped outside completely, close the active swipe
                         activeSwipeElement.style.transform = `translateX(0px)`;
+                        activeSwipeElement.parentNode.classList.remove('swipe-open', 'is-swiping');
                         activeSwipeElement = null;
                     }
                 }, { passive: true });
@@ -4656,6 +4712,7 @@
 
                     if (Math.abs(diffX) > 10) {
                         isSwiping = true;
+                        activeSwipeElement.parentNode.classList.add('is-swiping');
                     }
 
                     // Allow swipe in both directions up to 100px
@@ -4672,12 +4729,15 @@
                     if (diffX < -50) {
                         // Reveal Delete action
                         activeSwipeElement.style.transform = `translateX(-80px)`;
+                        activeSwipeElement.parentNode.classList.add('swipe-open');
                     } else if (diffX > 50) {
                         // Reveal Edit action
                         activeSwipeElement.style.transform = `translateX(80px)`;
+                        activeSwipeElement.parentNode.classList.add('swipe-open');
                     } else {
                         // Snap back
                         activeSwipeElement.style.transform = `translateX(0px)`;
+                        activeSwipeElement.parentNode.classList.remove('swipe-open', 'is-swiping');
                         if (!isSwiping) {
                             activeSwipeElement = null; // Free it up right away for clicks
                         }
