@@ -1,6 +1,3 @@
-index.html
-HTML 186.62KB
-generate readme for GitHub
 Construction Shift Tracker
 
 A progressive web application (PWA) for construction workers and contractors to track work shifts, manage payments, and visualize earnings. Built with vanilla JavaScript and designed for mobile-first usage.
