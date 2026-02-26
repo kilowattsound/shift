@@ -1,0 +1,4751 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- iOS PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Shift Tracker">
+    <link rel="apple-touch-icon"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/calendar-check.svg">
+
+    <title>Construction Shift Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --text-main: #2b2d42;
+            --text-muted: #8d99ae;
+            --bg-body: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e9ecef;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --border-radius: 16px;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+            --base-size: 16px;
+            --font-xs: 0.75rem;
+            --font-sm: 0.85rem;
+            --font-md: 0.95rem;
+            --font-lg: 1.1rem;
+            --font-xl: 1.25rem;
+
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-xxl: 24px;
+
+            --element-height: 44px;
+            --element-height-sm: 36px;
+            --element-height-lg: 48px;
+
+            --input-padding: 0 var(--spacing-md);
+        }
+
+        .dark-theme {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #e2e8f0;
+            --border-color: #334155;
+            --primary: #60a5fa;
+            --secondary: #3b82f6;
+            --success: #34d399;
+            --warning: #f87171;
+            --accent: #a78bfa;
+            --today: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        .professional-theme {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --primary: #475569;
+            --secondary: #334155;
+            --success: #059669;
+            --warning: #dc2626;
+            --accent: #7c3aed;
+            --today: #d97706;
+            --danger: #dc2626;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-size: var(--base-size);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: calc(80px + env(safe-area-inset-bottom));
+        }
+
+        .container {
+            max-width: 428px;
+            margin: 0 auto;
+            padding: var(--spacing-sm);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-top: var(--spacing-xs);
+        }
+
+        h1 {
+            font-size: var(--font-lg);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+
+        .btn-icon {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-size: var(--font-md);
+            cursor: pointer;
+            width: var(--element-height-sm);
+            height: var(--element-height-sm);
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-icon:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .date-selector {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: var(--spacing-md);
+            gap: var(--spacing-xs);
+        }
+
+        .date-row {
+            display: flex;
+            gap: var(--spacing-xs);
+            width: 100%;
+        }
+
+        select,
+        input[type="date"],
+        input[type="text"],
+        input[type="number"] {
+            flex: 1;
+            padding: var(--input-padding);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: var(--font-md);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            height: var(--element-height);
+            appearance: none;
+            background-repeat: no-repeat;
+            background-position: right var(--spacing-md) center;
+            background-size: 14px;
+            min-width: 0;
+            width: 100%;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        }
+
+        select:focus,
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .week-section {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+
+        .week-title {
+            font-weight: 700;
+            font-size: var(--font-md);
+            color: var(--primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .week-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            align-items: center;
+        }
+
+        .week-status {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 16px;
+            font-size: var(--font-xs);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            height: var(--element-height-sm);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-paid {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .shifts-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .shift-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            background-color: var(--card-bg);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            gap: var(--spacing-sm);
+            box-shadow: var(--shadow);
+        }
+
+        .shift-date-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 50px;
+            flex-shrink: 0;
+            gap: 2px;
+        }
+
+        .shift-date-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            background-color: var(--primary);
+            color: white;
+            border: 2px solid var(--primary);
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .shift-date-circle.has-shift {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .shift-date-circle.paid {
+            background-color: var(--success) !important;
+            border-color: var(--success) !important;
+        }
+
+        .shift-day-number {
+            font-size: var(--font-sm);
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .shift-day-name {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin-top: 1px;
+        }
+
+        .shift-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+            margin: 0;
+        }
+
+        .shift-project {
+            font-size: var(--font-md);
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+            color: var(--primary);
+        }
+
+        .shift-task {
+            font-size: var(--font-sm);
+            color: var(--gray);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+            font-weight: 500;
+        }
+
+        .shift-notes {
+            font-size: var(--font-xs);
+            color: var(--gray);
+            font-style: italic;
+            white-space: normal;
+            word-wrap: break-word;
+            max-height: 2.5em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.3;
+        }
+
+        .shift-actions {
+            display: flex;
+            flex-direction: row;
+            gap: 6px;
+            flex-shrink: 0;
+            align-self: center;
+        }
+
+        .btn-small {
+            padding: 6px;
+            border-radius: 8px;
+            border: none;
+            font-size: var(--font-xs);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            min-height: 32px;
+        }
+
+        .btn-edit {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-edit:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .btn-delete:hover {
+            background-color: var(--warning);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            padding: 0 var(--spacing-md);
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            box-shadow: var(--shadow);
+            font-size: var(--font-md);
+            height: var(--element-height);
+            min-width: 80px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .btn-warning {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .btn-warning:hover {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: rgba(220, 38, 38, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .floating-button {
+            position: fixed;
+            bottom: calc(16px + env(safe-area-inset-bottom));
+            right: 16px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            font-size: var(--font-md);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .floating-button:hover {
+            transform: scale(1.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: var(--spacing-sm);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 380px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: var(--font-md);
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: var(--font-lg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            width: var(--element-height-sm);
+            height: var(--element-height-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: var(--warning);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-sm);
+            width: 100%;
+            min-width: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--font-sm);
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            max-height: 120px;
+            line-height: 1.5;
+            padding: var(--spacing-sm) !important;
+            height: auto !important;
+            width: 100%;
+            min-width: 0;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: var(--font-md);
+            font-family: inherit;
+        }
+
+        /* СТИЛИ ДЛЯ SUMMARY */
+        .summary-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--success);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .summary-title {
+            font-size: var(--font-md);
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(114, 9, 183, 0.1));
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-item.highlight {
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.15), rgba(114, 9, 183, 0.15));
+            border-color: var(--success);
+        }
+
+        .stat-item.last-month {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(114, 9, 183, 0.1));
+            border-color: var(--today);
+        }
+
+        .stat-value {
+            font-size: var(--font-md);
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+
+        .stat-value.highlight {
+            color: var(--success);
+            font-size: var(--font-lg);
+        }
+
+        .stat-value.last-month {
+            color: var(--today);
+        }
+
+        .stat-label {
+            font-size: var(--font-xs);
+            color: var(--gray);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-lg) var(--spacing-md);
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+            color: var(--border-color);
+            opacity: 0.7;
+        }
+
+        .dark-theme .empty-state i {
+            color: var(--gray);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: var(--spacing-md);
+            gap: var(--spacing-xs);
+            background-color: var(--card-bg);
+            padding: var(--spacing-xs);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .tab {
+            flex: 1;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+            height: var(--element-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-sm);
+            border-radius: var(--border-radius);
+            border: 2px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .tab.active {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        .tab:hover:not(.active) {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .amount-input {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            width: 100%;
+        }
+
+        .amount-input span {
+            font-size: var(--font-md);
+            font-weight: 700;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .amount-input input {
+            flex: 1;
+            font-size: var(--font-md);
+            padding: 0 var(--spacing-sm);
+            min-width: 0;
+            width: 100%;
+        }
+
+        .settings-list {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-xs);
+            margin-top: var(--spacing-xs);
+            max-height: none;
+            overflow-y: visible;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-xs);
+            border-bottom: 1px solid var(--border-color);
+            min-height: var(--element-height);
+            gap: var(--spacing-xs);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: var(--font-sm);
+            font-weight: 500;
+        }
+
+        .settings-input-group {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-xs);
+            align-items: stretch;
+        }
+
+        .settings-input-group input {
+            flex: 1;
+            margin: 0;
+            min-width: 0;
+            width: 100%;
+            padding: var(--input-padding);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: var(--font-md);
+            height: var(--element-height);
+        }
+
+        .settings-input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .settings-remove-btn {
+            padding: 4px 8px !important;
+            font-size: var(--font-xs) !important;
+            height: var(--element-height-sm) !important;
+            min-width: 65px;
+            flex-shrink: 0;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .theme-option {
+            flex: 1;
+            padding: var(--spacing-xs);
+            border-radius: var(--border-radius);
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            font-weight: 600;
+            height: var(--element-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-sm);
+        }
+
+        .theme-option.active {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .custom-task-container {
+            display: none;
+            margin-top: var(--spacing-xs);
+            animation: fadeIn 0.3s ease;
+            width: 100%;
+        }
+
+        .custom-task-container.show {
+            display: block;
+        }
+
+        .custom-task-container input {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .calendar-view {
+            display: block;
+        }
+
+        .calendar-week-navigation {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+            flex-wrap: nowrap;
+            gap: var(--spacing-xs);
+            width: 100%;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            flex: 1;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .calendar-title {
+            font-weight: 700;
+            font-size: var(--font-sm);
+            color: var(--primary);
+            min-width: 0;
+            text-align: center;
+            margin: 0 var(--spacing-sm);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+
+        .calendar-title-btn {
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--border-radius);
+            border: 2px solid var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: var(--font-sm);
+            cursor: default;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: var(--element-height-sm);
+            min-width: 140px;
+        }
+
+        .calendar-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .calendar-actions .btn {
+            font-size: var(--font-xs);
+            height: var(--element-height-sm);
+            padding: 0 var(--spacing-sm);
+            white-space: nowrap;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            padding: 4px 0;
+        }
+
+        .calendar-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 6px 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .calendar-day.active {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .calendar-day.today {
+            border-color: var(--today);
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .calendar-day.has-shift {
+            background-color: rgba(67, 97, 238, 0.15);
+        }
+
+        .calendar-day.has-shift .day-circle {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .calendar-day.paid .day-circle {
+            background-color: var(--success) !important;
+            border-color: var(--success) !important;
+            color: white !important;
+        }
+
+        .calendar-day.weekend .day-name {
+            color: var(--warning);
+        }
+
+        .day-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: var(--font-sm);
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .calendar-day.active .day-circle {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .calendar-day.today .day-circle {
+            background-color: var(--today);
+            color: white;
+            border-color: var(--today);
+        }
+
+        .day-name {
+            font-size: 0.65rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-day.active .day-name {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .calendar-shifts {
+            margin-top: var(--spacing-md);
+        }
+
+        .calendar-empty {
+            text-align: center;
+            padding: var(--spacing-lg);
+            color: var(--gray);
+        }
+
+        .unpaid-shifts-btn {
+            margin-bottom: var(--spacing-md);
+            width: 100%;
+        }
+
+        .error-message {
+            color: var(--warning);
+            font-size: var(--font-xs);
+            margin-top: 3px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .input-error {
+            border-color: var(--warning) !important;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-5px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(5px);
+            }
+        }
+
+        .payment-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+        }
+
+        .payment-actions .btn {
+            flex: 1;
+        }
+
+        .period-payment-container {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background-color: rgba(67, 97, 238, 0.05);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--primary);
+        }
+
+        .period-item {
+            display: flex;
+            flex-direction: column;
+            padding: var(--spacing-sm);
+            margin-bottom: var(--spacing-xs);
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            gap: var(--spacing-xs);
+        }
+
+        .shift-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .shift-card:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .period-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            gap: var(--spacing-sm);
+        }
+
+        .period-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .period-dates {
+            font-size: var(--font-sm);
+            font-weight: 600;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .period-description {
+            font-size: var(--font-xs);
+            color: var(--gray);
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .period-amount {
+            font-weight: 700;
+            color: var(--success);
+            font-size: var(--font-sm);
+        }
+
+        .period-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .period-edit-form {
+            display: none;
+            margin-top: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background-color: rgba(67, 97, 238, 0.05);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--primary);
+            width: 100%;
+        }
+
+        .period-edit-form.show {
+            display: block;
+        }
+
+        .period-edit-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+        }
+
+        .period-edit-actions .btn {
+            flex: 1;
+        }
+
+        .quick-payment-section {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background-color: rgba(76, 201, 240, 0.05);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--success);
+        }
+
+        .quick-payment-title {
+            font-size: var(--font-sm);
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--spacing-sm);
+            text-align: center;
+        }
+
+        .list-view {
+            display: none;
+        }
+
+        .day-details-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .day-details-card.show {
+            display: block;
+        }
+
+        .day-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .day-details-title {
+            font-size: var(--font-md);
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .close-day-details {
+            background: none;
+            border: none;
+            font-size: var(--font-lg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            width: var(--element-height-sm);
+            height: var(--element-height-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-day-details:hover {
+            color: var(--warning);
+        }
+
+        .day-shifts-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .day-shift-item {
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .day-shift-project {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+
+        .day-shift-task {
+            font-size: var(--font-sm);
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+
+        .day-shift-notes {
+            font-size: var(--font-xs);
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        .no-shifts-message {
+            text-align: center;
+            padding: var(--spacing-lg);
+            color: var(--gray);
+        }
+
+        /* Стили для Year Summary */
+        .year-month-item {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .year-month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm);
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-xs);
+            border-left: 4px solid var(--accent);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .year-month-header:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .year-month-title {
+            font-weight: 700;
+            font-size: var(--font-md);
+            color: var(--accent);
+        }
+
+        .year-month-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-xs);
+            padding: var(--spacing-sm);
+            background-color: rgba(67, 97, 238, 0.05);
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .year-month-stats.show {
+            display: grid;
+        }
+
+        .year-stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--spacing-xs);
+            border-radius: var(--border-radius);
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .year-stat-value {
+            font-size: var(--font-sm);
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+
+        .year-stat-label {
+            font-size: var(--font-xs);
+            color: var(--gray);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Стили для All Time Summary */
+        .all-time-summary {
+            background: linear-gradient(135deg, rgba(114, 9, 183, 0.1), rgba(67, 97, 238, 0.1));
+            border-left: 4px solid var(--accent);
+        }
+
+        .all-time-summary .summary-title {
+            color: var(--accent);
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-small {
+            transition: all 0.2s ease;
+        }
+
+        .btn-small:active {
+            transform: scale(0.95);
+        }
+
+        .swipeable-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-xs);
+            background-color: transparent;
+            display: block;
+            /* Fix rendering bug */
+        }
+
+        .swipeable-container .shift-item,
+        .swipeable-container .day-shift-item {
+            margin-bottom: 0;
+            /* Override existing margins for smooth swiping */
+            position: relative;
+            z-index: 2;
+            transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            width: 100%;
+            /* Ensure it covers the background fully */
+            background-color: var(--card-bg);
+            /* Enforce solid background to hide delete button properly */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-y;
+        }
+
+        .swipe-background {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            /* Explicitly behind the shift item */
+            background-color: var(--warning);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+
+        .swipe-background-edit {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            /* Explicitly behind the shift item */
+            background-color: var(--primary);
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+        }
+
+        .btn-delete-swipe,
+        .btn-edit-swipe {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: var(--font-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        @media (max-width: 375px) {
+            .container {
+                padding: 8px;
+            }
+
+            .shift-item {
+                flex-direction: column;
+                gap: var(--spacing-xs);
+            }
+
+            .shift-date-container {
+                width: 100%;
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: var(--spacing-sm);
+            }
+
+            .shift-actions {
+                flex-direction: row;
+                align-self: flex-end;
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .btn-small {
+                min-width: 36px;
+                min-height: 36px;
+            }
+
+            .date-row {
+                flex-direction: column;
+            }
+
+            .calendar-header {
+                flex-wrap: wrap;
+            }
+
+            .calendar-nav {
+                order: 1;
+                width: 100%;
+                margin-top: var(--spacing-xs);
+            }
+
+            .calendar-actions {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+                margin-top: var(--spacing-xs);
+            }
+
+            .calendar-title-btn {
+                min-width: 120px;
+                font-size: var(--font-xs);
+            }
+
+            .day-circle {
+                width: 30px;
+                height: 30px;
+            }
+
+            .calendar-actions .btn {
+                font-size: var(--font-xs);
+                padding: 0 8px;
+            }
+
+            .period-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-xs);
+            }
+
+            .period-actions {
+                align-self: flex-end;
+            }
+
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .year-month-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @supports(padding: max(0px)) {
+            .container {
+                padding-left: max(var(--spacing-sm), env(safe-area-inset-left));
+                padding-right: max(var(--spacing-sm), env(safe-area-inset-right));
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Toasts and Dialogs */
+        .toast-container {
+            position: fixed;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+            pointer-events: none;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .toast {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: var(--font-sm);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--warning);
+        }
+
+        .toast.info {
+            border-left-color: var(--primary);
+        }
+
+        .toast i {
+            font-size: var(--font-lg);
+        }
+
+        .toast.success i {
+            color: var(--success);
+        }
+
+        .toast.error i {
+            color: var(--warning);
+        }
+
+        .toast.info i {
+            color: var(--primary);
+        }
+    </style>
+</head>
+
+<body class="professional-theme">
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div style="color: white;">Loading...</div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Shift Tracker</h1>
+            <div class="header-actions">
+                <button class="btn-icon" id="settingsBtn" aria-label="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="shifts">Shifts</div>
+            <div class="tab" data-tab="summary">Summary</div>
+        </div>
+
+        <div id="shiftsTab" class="tab-content">
+            <div class="calendar-view">
+                <div class="calendar-week-navigation">
+                    <div class="calendar-header">
+                        <div class="calendar-actions">
+                            <button class="btn btn-outline today-btn" id="todayBtn">Today</button>
+                            <button class="btn btn-outline" id="calendarPaymentBtn">
+                                <i class="fas fa-money-bill-wave"></i> Payments
+                            </button>
+                        </div>
+                        <div class="calendar-nav">
+                            <button class="btn-icon" id="prevWeekBtn" aria-label="Previous week">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="calendar-title-btn" id="calendarTitle">
+                                June 2023
+                            </div>
+                            <button class="btn-icon" id="nextWeekBtn" aria-label="Next week">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-days" id="calendarDays">
+                    </div>
+                </div>
+
+                <div class="day-details-card" id="dayDetailsCard">
+                    <div class="day-details-header">
+                        <div class="day-details-title" id="dayDetailsTitle">Day Details</div>
+                        <button class="close-day-details" id="closeDayDetailsCard" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="day-shifts-list" id="dayShiftsList">
+                    </div>
+                </div>
+
+                <div class="calendar-shifts">
+                    <div id="calendarWeeksList">
+                    </div>
+
+                    <div class="empty-state" id="calendarEmptyState" style="display: none;">
+                        <i class="fas fa-calendar"></i>
+                        <h3>No shifts this week</h3>
+                        <p>Add shifts to see them in calendar view</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="summaryTab" class="tab-content" style="display: none;">
+            <!-- Filters & Charts -->
+            <details class="summary-card" open
+                style="margin-bottom: var(--spacing-md); padding: var(--spacing-md); cursor: pointer;">
+                <summary class="summary-title"
+                    style="margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                    Analytics & Filters
+                    <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
+                </summary>
+                <div style="cursor: default; margin-top: 15px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <select id="summaryFilterProject" class="input-field" style="flex: 1;">
+                            <option value="All">All Projects</option>
+                        </select>
+                        <select id="summaryFilterTask" class="input-field" style="flex: 1;">
+                            <option value="All">All Tasks</option>
+                        </select>
+                    </div>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="earningsChart"></canvas>
+                    </div>
+                </div>
+            </details>
+
+            <button class="btn btn-outline unpaid-shifts-btn" id="unpaidShiftsBtn">
+                <i class="fas fa-money-bill-wave"></i> Show Unpaid Shifts
+            </button>
+
+            <div id="unpaidWeeksList">
+            </div>
+
+            <!-- Weekly Summary -->
+            <div class="summary-card">
+                <div class="summary-header">
+                    <div class="summary-title">Weekly Summary</div>
+                    <div class="summary-period" id="weeklyPeriod">Week 2</div>
+                </div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="weekShifts">0</div>
+                        <div class="stat-label">Shifts</div>
+                    </div>
+                    <div class="stat-item highlight">
+                        <div class="stat-value highlight" id="weekPaid">$0</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="weekDailyAvg">$0</div>
+                        <div class="stat-label">Daily Average</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Summary -->
+            <div class="summary-card">
+                <div class="summary-header">
+                    <div class="summary-title">Monthly Summary</div>
+                    <div class="summary-period" id="monthlyPeriod">June 2023</div>
+                </div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="monthShifts">0</div>
+                        <div class="stat-label">Shifts</div>
+                    </div>
+                    <div class="stat-item highlight">
+                        <div class="stat-value highlight" id="monthPaid">$0</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="monthUnpaid">0</div>
+                        <div class="stat-label">Unpaid Days</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="monthDailyAvg">$0</div>
+                        <div class="stat-label">Daily Average</div>
+                    </div>
+                    <div class="stat-item last-month">
+                        <div class="stat-value last-month" id="lastMonthPaid">$0</div>
+                        <div class="stat-label">Last Month Paid</div>
+                    </div>
+                    <div class="stat-item last-month">
+                        <div class="stat-value last-month" id="lastMonthShifts">0</div>
+                        <div class="stat-label">Last Month Shifts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Year Summary -->
+            <div class="summary-card">
+                <div class="summary-header">
+                    <div class="summary-title">Year Summary</div>
+                    <div class="summary-period" id="yearPeriod">2023</div>
+                </div>
+                <div id="yearMonthsList">
+                </div>
+            </div>
+
+            <!-- Current Year Summary -->
+            <div class="summary-card all-time-summary">
+                <div class="summary-header">
+                    <div class="summary-title">Current Year Summary</div>
+                    <div class="summary-period" id="allTimePeriod">Current Year</div>
+                </div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="allTimeShifts">0</div>
+                        <div class="stat-label">Total Shifts</div>
+                    </div>
+                    <div class="stat-item highlight">
+                        <div class="stat-value highlight" id="allTimePaid">$0</div>
+                        <div class="stat-label">Total Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="allTimeDailyAvg">$0</div>
+                        <div class="stat-label">Daily Average</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-button" id="newShiftBtn" aria-label="Add new shift">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- New Shift Modal -->
+    <div class="modal" id="newShiftModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Add New Shift</div>
+                <button class="close-modal" id="closeNewShiftModal" aria-label="Close">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="shiftDate">Date</label>
+                <input type="date" id="shiftDate" required aria-required="true">
+                <div class="error-message" id="dateError"></div>
+            </div>
+            <div class="form-group">
+                <label for="projectSelect">Project</label>
+                <select id="projectSelect" required aria-required="true">
+                    <option value="">Select Project</option>
+                </select>
+                <div class="error-message" id="projectError"></div>
+            </div>
+            <div class="form-group">
+                <label for="taskSelect">Task</label>
+                <select id="taskSelect" required aria-required="true">
+                    <option value="">Select Task</option>
+                    <option value="Custom">Custom</option>
+                </select>
+                <div class="error-message" id="taskError"></div>
+                <div class="custom-task-container" id="customTaskContainer">
+                    <input type="text" id="customTaskInput" placeholder="Enter custom task...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="shiftNotes">Notes (Optional)</label>
+                <textarea id="shiftNotes" rows="3" placeholder="Add any additional notes..."></textarea>
+            </div>
+            <button class="btn btn-primary" id="saveShiftBtn">Save Shift</button>
+        </div>
+    </div>
+
+    <!-- Edit Shift Modal -->
+    <div class="modal" id="editShiftModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Edit Shift</div>
+                <button class="close-modal" id="closeEditShiftModal" aria-label="Close">&times;</button>
+            </div>
+            <input type="hidden" id="editShiftId">
+            <div class="form-group">
+                <label for="editShiftDate">Date</label>
+                <input type="date" id="editShiftDate" required aria-required="true">
+                <div class="error-message" id="editDateError"></div>
+            </div>
+            <div class="form-group">
+                <label for="editProjectSelect">Project</label>
+                <select id="editProjectSelect" required aria-required="true">
+                    <option value="">Select Project</option>
+                </select>
+                <div class="error-message" id="editProjectError"></div>
+            </div>
+            <div class="form-group">
+                <label for="editTaskSelect">Task</label>
+                <select id="editTaskSelect" required aria-required="true">
+                    <option value="">Select Task</option>
+                    <option value="Custom">Custom</option>
+                </select>
+                <div class="error-message" id="editTaskError"></div>
+                <div class="custom-task-container" id="editCustomTaskContainer">
+                    <input type="text" id="editCustomTaskInput" placeholder="Enter custom task...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="editShiftNotes">Notes (Optional)</label>
+                <textarea id="editShiftNotes" rows="3" placeholder="Add any additional notes..."></textarea>
+            </div>
+            <button class="btn btn-primary" id="updateShiftBtn">Update Shift</button>
+        </div>
+    </div>
+
+    <!-- Payment Periods Modal -->
+    <div class="modal" id="periodPaymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Manage Payment Periods</div>
+                <button class="close-modal" id="closePeriodPaymentModal">&times;</button>
+            </div>
+
+            <div class="quick-payment-section">
+                <div class="quick-payment-title">Quick Week Payment</div>
+                <div class="form-group">
+                    <label for="quickWeekAmount">Payment Amount</label>
+                    <div class="amount-input">
+                        <span>$</span>
+                        <input type="number" id="quickWeekAmount" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                </div>
+                <button class="btn btn-success" id="markCurrentWeekPaidBtn" style="width: 100%;">
+                    <i class="fas fa-check-circle"></i> Mark Current Week Paid
+                </button>
+            </div>
+
+            <div class="form-group" style="margin-top: var(--spacing-lg);">
+                <label for="periodStartDate">Start Date</label>
+                <input type="date" id="periodStartDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="periodEndDate">End Date</label>
+                <input type="date" id="periodEndDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="periodAmount">Payment Amount</label>
+                <div class="amount-input">
+                    <span>$</span>
+                    <input type="number" id="periodAmount" placeholder="0.00" step="0.01" min="0" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="periodDescription">Description (Optional)</label>
+                <input type="text" id="periodDescription" placeholder="e.g., Construction work payment...">
+            </div>
+
+            <button class="btn btn-primary" id="addPeriodBtn" style="width: 100%;">
+                <i class="fas fa-plus"></i> Add Payment Period
+            </button>
+
+            <div class="period-payment-container">
+                <h4 style="margin-bottom: var(--spacing-sm);">Existing Payment Periods</h4>
+                <div id="paymentPeriodsList">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Settings</div>
+                <button class="close-modal" id="closeSettingsModal" aria-label="Close">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Themes</label>
+                <div class="theme-selector">
+                    <div class="theme-option active" data-theme="professional-theme">Professional</div>
+                    <div class="theme-option" data-theme="dark-theme">Dark</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Cache Management</label>
+                <div class="settings-input-group">
+                    <button class="btn btn-outline" id="rebuildCacheSettingsBtn" style="flex: 1;">
+                        <i class="fas fa-sync-alt"></i> Rebuild Cache
+                    </button>
+                    <button class="btn btn-warning" id="clearCacheSettingsBtn" style="flex: 1;">
+                        <i class="fas fa-broom"></i> Clear Cache
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Projects</label>
+                <div class="settings-input-group">
+                    <input type="text" id="newProject" placeholder="New project name">
+                    <button class="btn btn-outline" id="addProjectBtn">Add</button>
+                </div>
+                <div class="settings-list" id="projectsList">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Tasks</label>
+                <div class="settings-input-group">
+                    <input type="text" id="newTask" placeholder="New task name">
+                    <button class="btn btn-outline" id="addTaskBtn">Add</button>
+                </div>
+                <div class="settings-list" id="tasksList">
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: var(--spacing-md);">
+                <label>Data Management</label>
+                <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; margin-bottom: 10px;">
+                    <button type="button" class="btn btn-outline" id="exportDataBtn" style="flex: 1;">
+                        <i class="fas fa-download"></i> Backup Data
+                    </button>
+                    <button type="button" class="btn btn-outline" id="importDataBtn" style="flex: 1;">
+                        <i class="fas fa-upload"></i> Restore Data
+                    </button>
+                </div>
+                <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                <small class="form-text">Backup your data regularly to prevent accidental loss.</small>
+            </div>
+
+            <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                <button type="button" class="btn btn-primary" id="exportCsvBtn" style="flex: 1;">
+                    <i class="fas fa-file-csv"></i> Export to CSV
+                </button>
+                <button type="button" class="btn btn-primary" id="saveSettingsBtn" style="flex: 1;">
+                    Close Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Dialog -->
+    <div class="modal" id="confirmDialogModal">
+        <div class="modal-content" style="max-width: 320px; text-align: center;">
+            <div id="confirmDialogIcon" style="font-size: 3rem; margin-bottom: 10px; color: var(--warning);">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 id="confirmDialogTitle" style="margin-bottom: 10px; color: var(--text-color);">Are you sure?</h3>
+            <p id="confirmDialogMessage" style="color: var(--gray); font-size: var(--font-sm); margin-bottom: 20px;">
+                This action cannot be undone.</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-outline" id="confirmDialogCancelBtn" style="flex: 1;">Cancel</button>
+                <button class="btn btn-danger" id="confirmDialogConfirmBtn" style="flex: 1;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        class UI {
+            static showToast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+
+                let icon = 'fa-info-circle';
+                if (type === 'success') icon = 'fa-check-circle';
+                if (type === 'error') icon = 'fa-exclamation-circle';
+
+                toast.innerHTML = `<i class="fas ${icon}"></i> <span>${SecurityUtils.escapeHtml(message)}</span>`;
+                container.appendChild(toast);
+
+                setTimeout(() => toast.classList.add('show'), 10);
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            static confirm(title, message, onConfirm, confirmText = 'Confirm', type = 'danger') {
+                const modal = document.getElementById('confirmDialogModal');
+                document.getElementById('confirmDialogTitle').textContent = title;
+                document.getElementById('confirmDialogMessage').textContent = message;
+
+                const confirmBtn = document.getElementById('confirmDialogConfirmBtn');
+                confirmBtn.textContent = confirmText;
+                confirmBtn.className = `btn btn-${type}`;
+
+                const iconContainer = document.getElementById('confirmDialogIcon');
+                if (type === 'danger') {
+                    iconContainer.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                    iconContainer.style.color = 'var(--warning)';
+                } else {
+                    iconContainer.innerHTML = '<i class="fas fa-question-circle"></i>';
+                    iconContainer.style.color = 'var(--primary)';
+                }
+
+                modal.classList.add('active');
+
+                const newConfirmBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                const cancelBtn = document.getElementById('confirmDialogCancelBtn');
+                const newCancelBtn = cancelBtn.cloneNode(true);
+                cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+                newConfirmBtn.addEventListener('click', () => {
+                    modal.classList.remove('active');
+                    onConfirm();
+                });
+
+                newCancelBtn.addEventListener('click', () => {
+                    modal.classList.remove('active');
+                });
+            }
+        }
+
+        // State Management Class
+        class AppState {
+            constructor() {
+                this.shifts = [];
+                this.projects = [];
+                this.tasks = [];
+                this.paymentPeriods = [];
+                this.theme = 'professional-theme';
+                this.shiftsCache = null;
+                this.cacheEnabled = true;
+
+                this.currentCalendarWeek = 1;
+                this.currentCalendarYear = new Date().getFullYear();
+                this.currentCalendarMonth = new Date().getMonth();
+                this.selectedCalendarDate = new Date();
+                this.showUnpaidWeeks = false;
+
+                this.observers = [];
+            }
+
+            loadFromLocalStorage() {
+                try {
+                    this.shifts = this.getFromLocalStorage('shifts', []);
+                    this.projects = this.getFromLocalStorage('projects', ['Residential Building A', 'Commercial Complex B']);
+                    this.tasks = this.getFromLocalStorage('tasks', ['Plumbing', 'Framing', 'Electrical', 'Painting']);
+                    this.paymentPeriods = this.getFromLocalStorage('paymentPeriods', []);
+
+                    // Theme detection logic
+                    const savedTheme = localStorage.getItem('theme');
+                    if (savedTheme) {
+                        this.theme = savedTheme;
+                    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        this.theme = 'dark-theme';
+                    } else {
+                        this.theme = 'professional-theme'; // Default if no preference or saved theme
+                    }
+
+                    // Validate and clean data
+                    this.validateData();
+
+                    return true;
+                } catch (error) {
+                    console.error('Failed to load from localStorage:', error);
+                    this.showError('Failed to load data. Starting with empty state.');
+                    return false;
+                }
+            }
+
+            getFromLocalStorage(key, defaultValue = []) {
+                try {
+                    const item = localStorage.getItem(key);
+                    if (!item) return defaultValue;
+
+                    const parsed = JSON.parse(item);
+                    // Basic validation of parsed data
+                    if (Array.isArray(parsed) || (typeof parsed === 'object' && parsed !== null)) {
+                        return parsed;
+                    }
+                    return defaultValue;
+                } catch (error) {
+                    console.error(`Error parsing ${key} from localStorage:`, error);
+                    return defaultValue;
+                }
+            }
+
+            saveToLocalStorage() {
+                try {
+                    localStorage.setItem('shifts', JSON.stringify(this.shifts));
+                    localStorage.setItem('projects', JSON.stringify(this.projects));
+                    localStorage.setItem('tasks', JSON.stringify(this.tasks));
+                    localStorage.setItem('paymentPeriods', JSON.stringify(this.paymentPeriods));
+                    localStorage.setItem('theme', this.theme);
+                    return true;
+                } catch (error) {
+                    console.error('Failed to save data:', error);
+                    if (error.name === 'QuotaExceededError') {
+                        this.showError('Storage is full. Please delete some shifts to save new data.');
+                    } else {
+                        this.showError('Error saving data. Your changes may not be saved.');
+                    }
+                    return false;
+                }
+            }
+
+            validateData() {
+                const validShifts = [];
+                const invalidShifts = [];
+
+                this.shifts.forEach(shift => {
+                    if (!shift.id || !shift.date || !shift.project || !shift.task) {
+                        invalidShifts.push(shift);
+                        console.warn('Invalid shift found:', shift);
+                    } else {
+                        // Validate date format
+                        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                        if (!dateRegex.test(shift.date)) {
+                            invalidShifts.push(shift);
+                            console.warn('Invalid date format:', shift);
+                        } else {
+                            validShifts.push(shift);
+                        }
+                    }
+                });
+
+                if (invalidShifts.length > 0) {
+                    console.log(`Found ${invalidShifts.length} invalid shifts`);
+                    this.shifts = validShifts;
+                    this.saveToLocalStorage();
+                    this.invalidateCache();
+                }
+
+                // Sort arrays
+                this.projects.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+                this.tasks.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+            }
+
+            invalidateCache() {
+                this.shiftsCache = null;
+                this.notifyObservers();
+            }
+
+            addObserver(callback) {
+                this.observers.push(callback);
+            }
+
+            removeObserver(callback) {
+                const index = this.observers.indexOf(callback);
+                if (index > -1) {
+                    this.observers.splice(index, 1);
+                }
+            }
+
+            notifyObservers() {
+                this.observers.forEach(callback => callback());
+            }
+
+            showError(message) {
+                console.error(message);
+                // Could be enhanced with a toast notification system
+            }
+        }
+
+        // Utility functions with fixes
+        class DateUtils {
+            static formatCurrency(amount) {
+                const num = parseFloat(amount || 0);
+                if (isNaN(num)) return '$0';
+                if (num < 0) return '-$' + Math.abs(num).toFixed(2);
+                const formatted = num % 1 === 0 ? `$${num}` : `$${num.toFixed(2)}`;
+                return formatted;
+            }
+
+            static generateShiftId(shifts) {
+                if (shifts.length === 0) return 1;
+                const maxId = Math.max(...shifts.map(s => s.id || 0));
+                return maxId + 1;
+            }
+
+            static formatDateForInput(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            static parseDateFromInput(dateString) {
+                const [year, month, day] = dateString.split('-').map(Number);
+                return new Date(year, month - 1, day);
+            }
+
+            static formatDateForDisplay(dateString) {
+                const date = this.parseDateFromInput(dateString);
+                const options = { month: 'short', day: 'numeric' };
+                return date.toLocaleDateString('en-US', options);
+            }
+
+            static getDayName(date, format = 'short') {
+                return date.toLocaleDateString('en-US', { weekday: format });
+            }
+
+            // FIXED: Correct ISO week number calculation
+            static getWeekNumber(date) {
+                const d = new Date(date.getTime());
+                d.setHours(0, 0, 0, 0);
+
+                // Set to nearest Thursday: current date + 4 - current day number
+                // Make Sunday's day number 7
+                d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+
+                // Get first day of year
+                const yearStart = new Date(d.getFullYear(), 0, 1);
+
+                // Calculate full weeks to nearest Thursday
+                const weekNumber = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+
+                return weekNumber;
+            }
+
+            // FIXED: Get year for ISO week
+            static getWeekYear(date) {
+                const d = new Date(date.getTime());
+                d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+                return d.getFullYear();
+            }
+
+            // FIXED: Get number of weeks in a year
+            static getWeeksInYear(year) {
+                const d = new Date(year, 11, 31);
+                const week = this.getWeekNumber(d);
+                return week === 1 ? 52 : week;
+            }
+
+            // FIXED: Get week range with proper ISO week handling
+            static getWeekRange(year, weekNumber) {
+                const simple = new Date(year, 0, 1 + (weekNumber - 1) * 7);
+                const dayOfWeek = simple.getDay();
+                const ISOweekStart = new Date(simple);
+
+                if (dayOfWeek <= 4) {
+                    ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+                } else {
+                    ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+                }
+
+                const start = new Date(ISOweekStart);
+                start.setHours(0, 0, 0, 0);
+
+                const end = new Date(start);
+                end.setDate(start.getDate() + 6);
+                end.setHours(23, 59, 59, 999);
+
+                return { start, end };
+            }
+
+            static isDateInRange(date, start, end) {
+                const checkDate = new Date(date.getTime());
+                checkDate.setHours(0, 0, 0, 0);
+
+                const startDate = new Date(start.getTime());
+                startDate.setHours(0, 0, 0, 0);
+
+                const endDate = new Date(end.getTime());
+                endDate.setHours(23, 59, 59, 999);
+
+                return checkDate >= startDate && checkDate <= endDate;
+            }
+        }
+
+        // Security functions
+        class SecurityUtils {
+            static escapeHtml(unsafe) {
+                if (typeof unsafe !== 'string') return unsafe;
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            static sanitizeInput(input, maxLength = 100) {
+                if (typeof input !== 'string') return '';
+                const trimmed = input.trim();
+                if (trimmed.length > maxLength) {
+                    return trimmed.substring(0, maxLength);
+                }
+                // Remove potentially dangerous characters but keep useful ones
+                return trimmed.replace(/[<>]/g, '');
+            }
+
+            static validateDateString(dateString) {
+                const regex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!regex.test(dateString)) return false;
+
+                const date = DateUtils.parseDateFromInput(dateString);
+                if (isNaN(date.getTime())) return false;
+
+                // Check if date is not in the future
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return date <= today;
+            }
+        }
+
+        // Payment calculations with fixes
+        class PaymentCalculator {
+            constructor(appState) {
+                this.appState = appState;
+            }
+
+            getDatePaymentStatus(dateString) {
+                const date = DateUtils.parseDateFromInput(dateString);
+                if (isNaN(date.getTime())) return 'pending';
+
+                // Use cache for better performance
+                if (!this._paymentCache) this._paymentCache = new Map();
+                const cacheKey = `payment_${dateString}`;
+                if (this._paymentCache.has(cacheKey)) {
+                    return this._paymentCache.get(cacheKey);
+                }
+
+                for (let period of this.appState.paymentPeriods) {
+                    if (period.status === 'paid') {
+                        const startDate = DateUtils.parseDateFromInput(period.startDate);
+                        const endDate = DateUtils.parseDateFromInput(period.endDate);
+
+                        if (DateUtils.isDateInRange(date, startDate, endDate)) {
+                            this._paymentCache.set(cacheKey, 'paid');
+                            return 'paid';
+                        }
+                    }
+                }
+
+                this._paymentCache.set(cacheKey, 'pending');
+                return 'pending';
+            }
+
+            isDatePaid(dateString) {
+                return this.getDatePaymentStatus(dateString) === 'paid';
+            }
+
+            calculateTotalPaidAmount() {
+                return this.appState.paymentPeriods
+                    .filter(period => period.status === 'paid')
+                    .reduce((total, period) => total + parseFloat(period.amount || 0), 0);
+            }
+
+            calculateUnpaidDays() {
+                const cachedShifts = this.getCachedShifts();
+                return cachedShifts.filter(shift => !this.isDatePaid(shift.date)).length;
+            }
+
+            getUnfilteredCachedShifts() {
+                if (!this.appState.cacheEnabled || !this.appState.shiftsCache) {
+                    this.appState.shiftsCache = this.appState.shifts.map(shift => {
+                        const parsedDate = DateUtils.parseDateFromInput(shift.date);
+                        return {
+                            ...shift,
+                            _parsedDate: parsedDate,
+                            _weekNumber: DateUtils.getWeekNumber(parsedDate),
+                            _year: DateUtils.getWeekYear(parsedDate)
+                        };
+                    });
+                }
+                return this.appState.shiftsCache;
+            }
+
+            getCachedShifts() {
+                let shifts = this.getUnfilteredCachedShifts();
+
+                // Apply UI filters if elements exist
+                const projectFilter = document.getElementById('summaryFilterProject');
+                const taskFilter = document.getElementById('summaryFilterTask');
+
+                if (projectFilter && projectFilter.value !== 'All') {
+                    shifts = shifts.filter(s => s.project === projectFilter.value);
+                }
+                if (taskFilter && taskFilter.value !== 'All') {
+                    shifts = shifts.filter(s => s.task === taskFilter.value);
+                }
+
+                return shifts;
+            }
+
+            getAllWorkDaysInPeriod(period, shifts) {
+                const startDate = DateUtils.parseDateFromInput(period.startDate);
+                const endDate = DateUtils.parseDateFromInput(period.endDate);
+
+                const periodWorkDays = new Set();
+
+                shifts.forEach(shift => {
+                    const shiftDate = DateUtils.parseDateFromInput(shift.date);
+                    if (DateUtils.isDateInRange(shiftDate, startDate, endDate)) {
+                        periodWorkDays.add(shift.date);
+                    }
+                });
+
+                return Array.from(periodWorkDays);
+            }
+
+            calculateWeeklyPaidAmount(weekNumber, year) {
+                let weeklyPaid = 0;
+                const cachedShifts = this.getCachedShifts();
+
+                const weekShifts = cachedShifts.filter(shift => {
+                    return shift._weekNumber === weekNumber && shift._year === year;
+                });
+
+                if (weekShifts.length === 0) return 0;
+
+                const weekWorkDays = [...new Set(weekShifts.map(shift => shift.date))];
+
+                weekWorkDays.forEach(workDate => {
+                    if (this.isDatePaid(workDate)) {
+                        for (let period of this.appState.paymentPeriods) {
+                            if (period.status === 'paid') {
+                                const startDate = DateUtils.parseDateFromInput(period.startDate);
+                                const endDate = DateUtils.parseDateFromInput(period.endDate);
+                                const currentDate = DateUtils.parseDateFromInput(workDate);
+
+                                if (DateUtils.isDateInRange(currentDate, startDate, endDate)) {
+                                    const allWorkDaysInPeriod = this.getAllWorkDaysInPeriod(period, this.getUnfilteredCachedShifts());
+
+                                    if (allWorkDaysInPeriod.length > 0) {
+                                        const dailyAmount = parseFloat(period.amount) / allWorkDaysInPeriod.length;
+                                        weeklyPaid += dailyAmount;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return Math.round(weeklyPaid * 100) / 100;
+            }
+
+            calculateWeeklyDailyAverage(weekNumber, year) {
+                const cachedShifts = this.getCachedShifts();
+                const weekShifts = cachedShifts.filter(shift => {
+                    return shift._weekNumber === weekNumber && shift._year === year;
+                });
+
+                if (weekShifts.length === 0) return 0;
+
+                const weekWorkDays = [...new Set(weekShifts.map(shift => shift.date))];
+                const paidWorkDays = weekWorkDays.filter(workDate => this.isDatePaid(workDate));
+
+                if (paidWorkDays.length === 0) return 0;
+
+                let totalPaid = 0;
+
+                paidWorkDays.forEach(workDate => {
+                    for (let period of this.appState.paymentPeriods) {
+                        if (period.status === 'paid') {
+                            const startDate = DateUtils.parseDateFromInput(period.startDate);
+                            const endDate = DateUtils.parseDateFromInput(period.endDate);
+                            const currentDate = DateUtils.parseDateFromInput(workDate);
+
+                            if (DateUtils.isDateInRange(currentDate, startDate, endDate)) {
+                                const allWorkDaysInPeriod = this.getAllWorkDaysInPeriod(period, cachedShifts);
+
+                                if (allWorkDaysInPeriod.length > 0) {
+                                    const dailyAmount = parseFloat(period.amount) / allWorkDaysInPeriod.length;
+                                    totalPaid += dailyAmount;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                return paidWorkDays.length > 0 ? totalPaid / paidWorkDays.length : 0;
+            }
+
+            calculateMonthlyDailyAverage(month, year) {
+                const cachedShifts = this.getCachedShifts();
+                const monthShifts = cachedShifts.filter(shift => {
+                    const shiftDate = shift._parsedDate;
+                    return shiftDate.getMonth() === month &&
+                        shiftDate.getFullYear() === year;
+                });
+
+                if (monthShifts.length === 0) return 0;
+
+                const monthWorkDays = [...new Set(monthShifts.map(shift => shift.date))];
+                const paidWorkDays = monthWorkDays.filter(workDate => this.isDatePaid(workDate));
+
+                if (paidWorkDays.length === 0) return 0;
+
+                let totalPaid = 0;
+
+                paidWorkDays.forEach(workDate => {
+                    for (let period of this.appState.paymentPeriods) {
+                        if (period.status === 'paid') {
+                            const startDate = DateUtils.parseDateFromInput(period.startDate);
+                            const endDate = DateUtils.parseDateFromInput(period.endDate);
+                            const currentDate = DateUtils.parseDateFromInput(workDate);
+
+                            if (DateUtils.isDateInRange(currentDate, startDate, endDate)) {
+                                const allWorkDaysInPeriod = this.getAllWorkDaysInPeriod(period, this.getUnfilteredCachedShifts());
+
+                                if (allWorkDaysInPeriod.length > 0) {
+                                    const dailyAmount = parseFloat(period.amount) / allWorkDaysInPeriod.length;
+                                    totalPaid += dailyAmount;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                return paidWorkDays.length > 0 ? totalPaid / paidWorkDays.length : 0;
+            }
+
+            calculateMonthlyPaidAmount(month, year) {
+                let monthlyPaid = 0;
+                const cachedShifts = this.getCachedShifts();
+
+                const monthShifts = cachedShifts.filter(shift => {
+                    const shiftDate = shift._parsedDate;
+                    return shiftDate.getMonth() === month &&
+                        shiftDate.getFullYear() === year;
+                });
+
+                if (monthShifts.length === 0) return 0;
+
+                const monthWorkDays = [...new Set(monthShifts.map(shift => shift.date))];
+
+                monthWorkDays.forEach(workDate => {
+                    if (this.isDatePaid(workDate)) {
+                        for (let period of this.appState.paymentPeriods) {
+                            if (period.status === 'paid') {
+                                const startDate = DateUtils.parseDateFromInput(period.startDate);
+                                const endDate = DateUtils.parseDateFromInput(period.endDate);
+                                const currentDate = DateUtils.parseDateFromInput(workDate);
+
+                                if (DateUtils.isDateInRange(currentDate, startDate, endDate)) {
+                                    const allWorkDaysInPeriod = this.getAllWorkDaysInPeriod(period, this.getUnfilteredCachedShifts());
+                                    if (allWorkDaysInPeriod.length > 0) {
+                                        const dailyAmount = parseFloat(period.amount) / allWorkDaysInPeriod.length;
+                                        monthlyPaid += dailyAmount;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return monthlyPaid;
+            }
+
+            calculateYearlyData(year) {
+                const cachedShifts = this.getCachedShifts();
+
+                // Получаем все смены за указанный год
+                const yearShifts = cachedShifts.filter(shift => {
+                    return shift._parsedDate.getFullYear() === year;
+                });
+
+                if (yearShifts.length === 0) {
+                    return {
+                        months: {},
+                        totalShifts: 0,
+                        totalPaid: 0,
+                        averageDaily: 0
+                    };
+                }
+
+                // Группируем по месяцам
+                const monthsData = {};
+
+                for (let i = 0; i < 12; i++) {
+                    const monthShifts = yearShifts.filter(shift => {
+                        return shift._parsedDate.getMonth() === i;
+                    });
+
+                    if (monthShifts.length > 0) {
+                        const monthPaid = this.calculateMonthlyPaidAmount(i, year);
+                        const monthAvg = this.calculateMonthlyDailyAverage(i, year);
+
+                        monthsData[i] = {
+                            name: new Date(year, i).toLocaleDateString('en-US', { month: 'long' }),
+                            shifts: monthShifts.length,
+                            paid: monthPaid,
+                            averageDaily: monthAvg
+                        };
+                    }
+                }
+
+                // Общие данные за год
+                let totalPaid = 0;
+
+                const yearWorkDays = [...new Set(yearShifts.map(shift => shift.date))];
+                const paidWorkDays = yearWorkDays.filter(workDate => this.isDatePaid(workDate));
+
+                paidWorkDays.forEach(workDate => {
+                    for (let period of this.appState.paymentPeriods) {
+                        if (period.status === 'paid') {
+                            const startDate = DateUtils.parseDateFromInput(period.startDate);
+                            const endDate = DateUtils.parseDateFromInput(period.endDate);
+                            const currentDate = DateUtils.parseDateFromInput(workDate);
+
+                            if (DateUtils.isDateInRange(currentDate, startDate, endDate)) {
+                                const allWorkDaysInPeriod = this.getAllWorkDaysInPeriod(period, this.getUnfilteredCachedShifts());
+
+                                if (allWorkDaysInPeriod.length > 0) {
+                                    const dailyAmount = parseFloat(period.amount) / allWorkDaysInPeriod.length;
+                                    totalPaid += dailyAmount;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                const averageDaily = paidWorkDays.length > 0 ? totalPaid / paidWorkDays.length : 0;
+
+                return {
+                    months: monthsData,
+                    totalShifts: yearShifts.length,
+                    totalPaid: totalPaid,
+                    averageDaily: averageDaily
+                };
+            }
+
+            calculateAllTimeData() {
+                const cachedShifts = this.getCachedShifts();
+
+                if (cachedShifts.length === 0) {
+                    return {
+                        totalShifts: 0,
+                        totalPaid: 0,
+                        averageDaily: 0
+                    };
+                }
+
+                let totalPaid = 0;
+
+                const allWorkDays = [...new Set(cachedShifts.map(shift => shift.date))];
+                const paidWorkDays = allWorkDays.filter(workDate => this.isDatePaid(workDate));
+
+                paidWorkDays.forEach(workDate => {
+                    for (let period of this.appState.paymentPeriods) {
+                        if (period.status === 'paid') {
+                            const startDate = DateUtils.parseDateFromInput(period.startDate);
+                            const endDate = DateUtils.parseDateFromInput(period.endDate);
+                            const currentDate = DateUtils.parseDateFromInput(workDate);
+
+                            if (DateUtils.isDateInRange(currentDate, startDate, endDate)) {
+                                const allWorkDaysInPeriod = this.getAllWorkDaysInPeriod(period, this.getUnfilteredCachedShifts());
+
+                                if (allWorkDaysInPeriod.length > 0) {
+                                    const dailyAmount = parseFloat(period.amount) / allWorkDaysInPeriod.length;
+                                    totalPaid += dailyAmount;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                const averageDaily = paidWorkDays.length > 0 ? totalPaid / paidWorkDays.length : 0;
+
+                return {
+                    totalShifts: cachedShifts.length,
+                    totalPaid: totalPaid,
+                    averageDaily: averageDaily
+                };
+            }
+
+            getLastMonthData() {
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+
+                let lastMonth = currentMonth - 1;
+                let lastYear = currentYear;
+
+                if (lastMonth < 0) {
+                    lastMonth = 11;
+                    lastYear = currentYear - 1;
+                }
+
+                const lastMonthPaidAmount = this.calculateMonthlyPaidAmount(lastMonth, lastYear);
+                const cachedShifts = this.getCachedShifts();
+                const lastMonthShiftsList = cachedShifts.filter(shift => {
+                    const shiftDate = shift._parsedDate;
+                    return shiftDate.getMonth() === lastMonth &&
+                        shiftDate.getFullYear() === lastYear;
+                });
+
+                return {
+                    paid: lastMonthPaidAmount,
+                    shifts: lastMonthShiftsList.length
+                };
+            }
+
+            invalidateCache() {
+                this._paymentCache = null;
+            }
+        }
+
+        // Main Application Class
+        class ShiftTrackerApp {
+            constructor() {
+                this.state = new AppState();
+                this.paymentCalculator = new PaymentCalculator(this.state);
+
+                this.initializeDOMReferences();
+                this.setupEventListeners();
+                this.init();
+            }
+
+            initializeDOMReferences() {
+                // DOM Elements caching
+                this.elements = {
+                    themeToggle: document.getElementById('themeToggle'),
+                    settingsBtn: document.getElementById('settingsBtn'),
+                    newShiftBtn: document.getElementById('newShiftBtn'),
+                    newShiftModal: document.getElementById('newShiftModal'),
+                    editShiftModal: document.getElementById('editShiftModal'),
+                    periodPaymentModal: document.getElementById('periodPaymentModal'),
+                    settingsModal: document.getElementById('settingsModal'),
+
+                    closeNewShiftModal: document.getElementById('closeNewShiftModal'),
+                    closeEditShiftModal: document.getElementById('closeEditShiftModal'),
+                    closePeriodPaymentModal: document.getElementById('closePeriodPaymentModal'),
+                    closeSettingsModal: document.getElementById('closeSettingsModal'),
+
+                    saveShiftBtn: document.getElementById('saveShiftBtn'),
+                    updateShiftBtn: document.getElementById('updateShiftBtn'),
+                    calendarPaymentBtn: document.getElementById('calendarPaymentBtn'),
+                    addPeriodBtn: document.getElementById('addPeriodBtn'),
+                    markCurrentWeekPaidBtn: document.getElementById('markCurrentWeekPaidBtn'),
+
+                    tabs: document.querySelectorAll('.tab'),
+                    shiftsTab: document.getElementById('shiftsTab'),
+                    summaryTab: document.getElementById('summaryTab'),
+                    summaryFilterProject: document.getElementById('summaryFilterProject'),
+                    summaryFilterTask: document.getElementById('summaryFilterTask'),
+
+                    addProjectBtn: document.getElementById('addProjectBtn'),
+                    addTaskBtn: document.getElementById('addTaskBtn'),
+                    projectsList: document.getElementById('projectsList'),
+                    tasksList: document.getElementById('tasksList'),
+                    saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+
+                    themeOptions: document.querySelectorAll('.theme-option'),
+                    calendarTitle: document.getElementById('calendarTitle'),
+                    calendarDays: document.getElementById('calendarDays'),
+                    calendarWeeksList: document.getElementById('calendarWeeksList'),
+                    calendarEmptyState: document.getElementById('calendarEmptyState'),
+
+                    prevWeekBtn: document.getElementById('prevWeekBtn'),
+                    nextWeekBtn: document.getElementById('nextWeekBtn'),
+                    todayBtn: document.getElementById('todayBtn'),
+
+                    unpaidShiftsBtn: document.getElementById('unpaidShiftsBtn'),
+                    unpaidWeeksList: document.getElementById('unpaidWeeksList'),
+
+                    monthlyPeriod: document.getElementById('monthlyPeriod'),
+                    monthShifts: document.getElementById('monthShifts'),
+                    monthPaid: document.getElementById('monthPaid'),
+                    monthUnpaid: document.getElementById('monthUnpaid'),
+                    monthDailyAvg: document.getElementById('monthDailyAvg'),
+
+                    weeklyPeriod: document.getElementById('weeklyPeriod'),
+                    weekShifts: document.getElementById('weekShifts'),
+                    weekPaid: document.getElementById('weekPaid'),
+                    weekDailyAvg: document.getElementById('weekDailyAvg'),
+
+                    dateError: document.getElementById('dateError'),
+                    projectError: document.getElementById('projectError'),
+                    taskError: document.getElementById('taskError'),
+                    editDateError: document.getElementById('editDateError'),
+                    editProjectError: document.getElementById('editProjectError'),
+                    editTaskError: document.getElementById('editTaskError'),
+
+                    customTaskContainer: document.getElementById('customTaskContainer'),
+                    customTaskInput: document.getElementById('customTaskInput'),
+                    taskSelect: document.getElementById('taskSelect'),
+                    editCustomTaskContainer: document.getElementById('editCustomTaskContainer'),
+                    editCustomTaskInput: document.getElementById('editCustomTaskInput'),
+                    editTaskSelect: document.getElementById('editTaskSelect'),
+
+                    paymentPeriodsList: document.getElementById('paymentPeriodsList'),
+                    quickWeekAmount: document.getElementById('quickWeekAmount'),
+
+                    rebuildCacheSettingsBtn: document.getElementById('rebuildCacheSettingsBtn'),
+                    clearCacheSettingsBtn: document.getElementById('clearCacheSettingsBtn'),
+
+                    dayDetailsCard: document.getElementById('dayDetailsCard'),
+                    closeDayDetailsCard: document.getElementById('closeDayDetailsCard'),
+                    dayDetailsTitle: document.getElementById('dayDetailsTitle'),
+                    dayShiftsList: document.getElementById('dayShiftsList'),
+
+                    lastMonthPaid: document.getElementById('lastMonthPaid'),
+                    lastMonthShifts: document.getElementById('lastMonthShifts'),
+
+                    yearPeriod: document.getElementById('yearPeriod'),
+                    yearMonthsList: document.getElementById('yearMonthsList'),
+
+                    allTimePeriod: document.getElementById('allTimePeriod'),
+                    allTimeShifts: document.getElementById('allTimeShifts'),
+                    allTimePaid: document.getElementById('allTimePaid'),
+                    allTimeDailyAvg: document.getElementById('allTimeDailyAvg'),
+
+                    loadingOverlay: document.getElementById('loadingOverlay'),
+
+                    exportDataBtn: document.getElementById('exportDataBtn'),
+                    importDataBtn: document.getElementById('importDataBtn'),
+                    importFileInput: document.getElementById('importFileInput'),
+                    exportCsvBtn: document.getElementById('exportCsvBtn'),
+
+                    shiftDate: document.getElementById('shiftDate'),
+                    projectSelect: document.getElementById('projectSelect'),
+                    shiftNotes: document.getElementById('shiftNotes'),
+
+                    editShiftId: document.getElementById('editShiftId'),
+                    editShiftDate: document.getElementById('editShiftDate'),
+                    editProjectSelect: document.getElementById('editProjectSelect'),
+                    editShiftNotes: document.getElementById('editShiftNotes'),
+
+                    periodStartDate: document.getElementById('periodStartDate'),
+                    periodEndDate: document.getElementById('periodEndDate'),
+                    periodAmount: document.getElementById('periodAmount'),
+                    periodDescription: document.getElementById('periodDescription'),
+
+                    newProject: document.getElementById('newProject'),
+                    newTask: document.getElementById('newTask')
+                };
+            }
+
+            showLoading() {
+                this.elements.loadingOverlay.classList.add('active');
+            }
+
+            hideLoading() {
+                this.elements.loadingOverlay.classList.remove('active');
+            }
+
+            init() {
+                this.showLoading();
+
+                setTimeout(() => {
+                    this.state.loadFromLocalStorage();
+                    this.setTheme(this.state.theme);
+
+                    const today = new Date();
+                    this.elements.shiftDate.value = DateUtils.formatDateForInput(today);
+
+                    // Initialize calendar position
+                    this.state.selectedCalendarDate = today;
+                    this.state.currentCalendarWeek = DateUtils.getWeekNumber(today);
+                    this.state.currentCalendarYear = DateUtils.getWeekYear(today);
+                    this.state.currentCalendarMonth = today.getMonth();
+
+                    this.updateProjectSelects();
+                    this.renderProjects();
+                    this.renderTasks();
+                    this.renderCalendarWeek();
+                    this.renderCalendarShifts();
+                    this.updateSummary();
+
+                    // Add observer for state changes
+                    this.state.addObserver(() => {
+                        this.renderCalendarWeek();
+                        this.renderCalendarShifts();
+                        this.updateSummary();
+                    });
+
+                    this.hideLoading();
+                }, 300);
+            }
+
+            setTheme(theme) {
+                document.body.className = theme;
+                this.state.theme = theme;
+                this.state.saveToLocalStorage();
+
+                const icon = this.elements.themeToggle.querySelector('i');
+                if (theme === 'dark-theme') {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+
+                this.elements.themeOptions.forEach(option => {
+                    if (option.getAttribute('data-theme') === theme) {
+                        option.classList.add('active');
+                    } else {
+                        option.classList.remove('active');
+                    }
+                });
+            }
+
+            // FIXED: Calendar week rendering
+            renderCalendarWeek() {
+                const weekRange = DateUtils.getWeekRange(this.state.currentCalendarYear, this.state.currentCalendarWeek);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                this.state.currentCalendarMonth = weekRange.start.getMonth();
+
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+
+                this.elements.calendarTitle.textContent = `${monthNames[this.state.currentCalendarMonth]} ${this.state.currentCalendarYear}`;
+
+                this.elements.calendarDays.innerHTML = '';
+
+                const cachedShifts = this.paymentCalculator.getCachedShifts();
+                const weekShifts = cachedShifts.filter(shift => {
+                    return shift._weekNumber === this.state.currentCalendarWeek &&
+                        shift._year === this.state.currentCalendarYear;
+                });
+
+                let currentDate = new Date(weekRange.start);
+                const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+                for (let i = 0; i < 7; i++) {
+                    const day = new Date(currentDate);
+                    const dayShifts = weekShifts.filter(shift => {
+                        const shiftDate = shift._parsedDate;
+                        return shiftDate.getDate() === day.getDate() &&
+                            shiftDate.getMonth() === day.getMonth() &&
+                            shiftDate.getFullYear() === day.getFullYear();
+                    });
+
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+
+                    // Check if today
+                    if (day.getDate() === today.getDate() &&
+                        day.getMonth() === today.getMonth() &&
+                        day.getFullYear() === today.getFullYear()) {
+                        dayElement.classList.add('today');
+                    }
+
+                    // Check if selected
+                    if (day.getDate() === this.state.selectedCalendarDate.getDate() &&
+                        day.getMonth() === this.state.selectedCalendarDate.getMonth() &&
+                        day.getFullYear() === this.state.selectedCalendarDate.getFullYear()) {
+                        dayElement.classList.add('active');
+                    }
+
+                    // Check if has shifts
+                    if (dayShifts.length > 0) {
+                        dayElement.classList.add('has-shift');
+                    }
+
+                    // Check payment status
+                    const dayPaymentStatus = this.paymentCalculator.getDatePaymentStatus(DateUtils.formatDateForInput(day));
+                    if (dayPaymentStatus === 'paid') {
+                        dayElement.classList.add('paid');
+                    }
+
+                    // Check if weekend
+                    if (i >= 5) {
+                        dayElement.classList.add('weekend');
+                    }
+
+                    dayElement.innerHTML = `
+                        <div class="day-circle">${day.getDate()}</div>
+                        <div class="day-name">${dayNames[i]}</div>
+                    `;
+
+                    dayElement.addEventListener('click', () => {
+                        this.state.selectedCalendarDate = day;
+                        this.renderCalendarWeek();
+                        this.openDayDetails(day.getFullYear(), day.getMonth(), day.getDate());
+                    });
+
+                    this.elements.calendarDays.appendChild(dayElement);
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            }
+
+            renderCalendarShifts() {
+                const cachedShifts = this.paymentCalculator.getCachedShifts();
+
+                const weekShifts = cachedShifts.filter(shift => {
+                    return shift._weekNumber === this.state.currentCalendarWeek &&
+                        shift._year === this.state.currentCalendarYear;
+                });
+
+                if (weekShifts.length === 0) {
+                    this.elements.calendarWeeksList.innerHTML = '';
+                    this.elements.calendarEmptyState.style.display = 'block';
+                    return;
+                }
+
+                this.elements.calendarEmptyState.style.display = 'none';
+
+                const weekRange = DateUtils.getWeekRange(this.state.currentCalendarYear, this.state.currentCalendarWeek);
+
+                const weekSection = document.createElement('div');
+                weekSection.className = 'week-section';
+
+                const weekHeader = document.createElement('div');
+                weekHeader.className = 'week-header';
+
+                const isWeekPaid = weekShifts.every(shift => this.paymentCalculator.isDatePaid(shift.date));
+
+                weekHeader.innerHTML = `
+                    <div class="week-title" title="Week ${this.state.currentCalendarWeek} (${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.start))} - ${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.end))})">
+                        Week ${this.state.currentCalendarWeek} (${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.start))}-${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.end))})
+                    </div>
+                    <div class="week-actions">
+                        <button class="week-status ${isWeekPaid ? 'status-paid' : 'status-pending'}" data-week="${this.state.currentCalendarYear}-${this.state.currentCalendarMonth}-${this.state.currentCalendarWeek}">
+                            <i class="fas ${isWeekPaid ? 'fa-check-circle' : 'fa-clock'}"></i>
+                            ${isWeekPaid ? 'Paid' : 'Pending'}
+                        </button>
+                    </div>
+                `;
+
+                const shiftsContainer = document.createElement('div');
+                shiftsContainer.className = 'shifts-container';
+
+                // Sort shifts by date
+                const sortedShifts = [...weekShifts].sort((a, b) => {
+                    return new Date(a.date) - new Date(b.date);
+                });
+
+                const shiftsHTML = sortedShifts.map(shift => {
+                    return this.renderShiftItem(shift);
+                }).join('');
+
+                shiftsContainer.innerHTML = shiftsHTML;
+
+                weekSection.appendChild(weekHeader);
+                weekSection.appendChild(shiftsContainer);
+
+                this.elements.calendarWeeksList.innerHTML = '';
+                this.elements.calendarWeeksList.appendChild(weekSection);
+            }
+
+            renderShiftItem(shift) {
+                const shiftDate = DateUtils.parseDateFromInput(shift.date);
+                const paymentStatus = this.paymentCalculator.getDatePaymentStatus(shift.date);
+
+                let dateCircleClass = 'shift-date-circle';
+                if (paymentStatus === 'paid') {
+                    dateCircleClass += ' paid';
+                }
+
+                return `
+                    <div class="swipeable-container">
+                        <div class="swipe-background">
+                            <button class="btn-delete-swipe" data-id="${shift.id}" onclick="event.stopPropagation(); window.app.deleteShift(${shift.id})">
+                                <i class="fas fa-trash"></i>
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                        <div class="swipe-background-edit">
+                            <button class="btn-edit-swipe" data-id="${shift.id}" onclick="event.stopPropagation(); window.app.openEditShiftModal(${shift.id})">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit</span>
+                            </button>
+                        </div>
+                        <div class="shift-item swipeable-item" style="background-color: var(--card-bg);">
+                            <div class="shift-date-container">
+                                <div class="${dateCircleClass}">
+                                    <div class="shift-day-number">${shiftDate.getDate()}</div>
+                                    <div class="shift-day-name">${DateUtils.getDayName(shiftDate, 'short')}</div>
+                                </div>
+                            </div>
+                            <div class="shift-details">
+                                <div class="shift-project" title="${SecurityUtils.escapeHtml(shift.project)}">
+                                    ${SecurityUtils.escapeHtml(shift.project)}
+                                </div>
+                                <div class="shift-task" title="${SecurityUtils.escapeHtml(shift.task)}">
+                                    ${SecurityUtils.escapeHtml(shift.task)}
+                                </div>
+                                ${shift.notes ? `<div class="shift-notes">${SecurityUtils.escapeHtml(shift.notes)}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // FIXED: Week navigation with proper year handling
+            goToPrevWeek() {
+                this.state.currentCalendarWeek--;
+                if (this.state.currentCalendarWeek < 1) {
+                    this.state.currentCalendarYear--;
+                    this.state.currentCalendarWeek = DateUtils.getWeeksInYear(this.state.currentCalendarYear);
+                }
+                this.renderCalendarWeek();
+                this.renderCalendarShifts();
+                this.updateSummary();
+            }
+
+            goToNextWeek() {
+                this.state.currentCalendarWeek++;
+                const weeksInYear = DateUtils.getWeeksInYear(this.state.currentCalendarYear);
+                if (this.state.currentCalendarWeek > weeksInYear) {
+                    this.state.currentCalendarYear++;
+                    this.state.currentCalendarWeek = 1;
+                }
+                this.renderCalendarWeek();
+                this.renderCalendarShifts();
+                this.updateSummary();
+            }
+
+            goToToday() {
+                this.state.selectedCalendarDate = new Date();
+                this.state.currentCalendarWeek = DateUtils.getWeekNumber(this.state.selectedCalendarDate);
+                this.state.currentCalendarYear = DateUtils.getWeekYear(this.state.selectedCalendarDate);
+                this.renderCalendarWeek();
+                this.renderCalendarShifts();
+                this.updateSummary();
+                this.closeDayDetails();
+            }
+
+            updateSummary() {
+                // Initialize Chart if needed
+                if (!this.earningsChart && window.Chart) {
+                    const ctx = document.getElementById('earningsChart').getContext('2d');
+                    Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+                    Chart.defaults.color = '#8d99ae';
+
+                    this.earningsChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels: [], datasets: [] },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: 'rgba(43, 45, 66, 0.9)',
+                                    titleFont: { size: 14, weight: '600' },
+                                    bodyFont: { size: 13 },
+                                    padding: 12,
+                                    cornerRadius: 8,
+                                    callbacks: {
+                                        label: function (context) {
+                                            return '$' + context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                                    ticks: {
+                                        callback: value => '$' + value,
+                                        font: { size: 11 }
+                                    }
+                                },
+                                x: {
+                                    grid: { display: false, drawBorder: false },
+                                    ticks: { font: { size: 11 } }
+                                }
+                            },
+                            animation: {
+                                duration: 800,
+                                easing: 'easeOutQuart'
+                            }
+                        }
+                    });
+                }
+
+                // Weekly Summary
+                const weekShiftsCount = this.paymentCalculator.getCachedShifts().filter(shift => {
+                    return shift._weekNumber === this.state.currentCalendarWeek &&
+                        shift._year === this.state.currentCalendarYear;
+                }).length;
+
+                const weeklyPaidAmount = this.paymentCalculator.calculateWeeklyPaidAmount(
+                    this.state.currentCalendarWeek,
+                    this.state.currentCalendarYear
+                );
+
+                const weeklyAvg = this.paymentCalculator.calculateWeeklyDailyAverage(
+                    this.state.currentCalendarWeek,
+                    this.state.currentCalendarYear
+                );
+
+                const weekRange = DateUtils.getWeekRange(this.state.currentCalendarYear, this.state.currentCalendarWeek);
+
+                this.elements.weeklyPeriod.textContent = `Week ${this.state.currentCalendarWeek} (${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.start))} - ${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.end))})`;
+                this.elements.weekShifts.textContent = weekShiftsCount;
+                if (this.elements.weekShifts.nextElementSibling) {
+                    this.elements.weekShifts.nextElementSibling.textContent = weekShiftsCount === 1 ? 'Shift' : 'Shifts';
+                }
+                this.elements.weekPaid.textContent = DateUtils.formatCurrency(weeklyPaidAmount);
+                this.elements.weekDailyAvg.textContent = DateUtils.formatCurrency(weeklyAvg);
+
+                // Monthly Summary
+                const month = this.state.currentCalendarMonth;
+                const year = weekRange.start.getFullYear();
+
+                const monthShiftsCount = this.paymentCalculator.getCachedShifts().filter(shift => {
+                    const shiftDate = shift._parsedDate;
+                    return shiftDate.getMonth() === month &&
+                        shiftDate.getFullYear() === year;
+                }).length;
+
+                const unpaidDays = this.paymentCalculator.calculateUnpaidDays();
+                const monthlyAvg = this.paymentCalculator.calculateMonthlyDailyAverage(month, year);
+                const monthlyPaidAmount = this.paymentCalculator.calculateMonthlyPaidAmount(month, year);
+
+                const monthName = new Date(year, month).toLocaleDateString('en-US', { month: 'long' });
+                this.elements.monthlyPeriod.textContent = `${monthName} ${year}`;
+                this.elements.monthShifts.textContent = monthShiftsCount;
+                if (this.elements.monthShifts.nextElementSibling) {
+                    this.elements.monthShifts.nextElementSibling.textContent = monthShiftsCount === 1 ? 'Shift' : 'Shifts';
+                }
+                this.elements.monthPaid.textContent = DateUtils.formatCurrency(monthlyPaidAmount);
+                this.elements.monthUnpaid.textContent = unpaidDays;
+                if (this.elements.monthUnpaid.nextElementSibling) {
+                    this.elements.monthUnpaid.nextElementSibling.textContent = unpaidDays === 1 ? 'Unpaid Day' : 'Unpaid Days';
+                }
+                this.elements.monthDailyAvg.textContent = DateUtils.formatCurrency(monthlyAvg);
+
+                // Last Month Data
+                const lastMonthData = this.paymentCalculator.getLastMonthData();
+                this.elements.lastMonthPaid.textContent = DateUtils.formatCurrency(lastMonthData.paid);
+                this.elements.lastMonthShifts.textContent = lastMonthData.shifts;
+                if (this.elements.lastMonthShifts.nextElementSibling) {
+                    this.elements.lastMonthShifts.nextElementSibling.textContent = lastMonthData.shifts === 1 ? 'Last Month Shift' : 'Last Month Shifts';
+                }
+
+                // Year Summary
+                const currentYear = new Date().getFullYear();
+                this.elements.yearPeriod.textContent = currentYear.toString();
+                this.renderYearSummary(currentYear);
+
+                // Current Year Summary (Replaces All Time)
+                const currentYearData = this.paymentCalculator.calculateYearlyData(currentYear);
+                this.elements.allTimeShifts.textContent = currentYearData.shifts;
+                if (this.elements.allTimeShifts.nextElementSibling) {
+                    this.elements.allTimeShifts.nextElementSibling.textContent = currentYearData.shifts === 1 ? 'Total Shift' : 'Total Shifts';
+                }
+                this.elements.allTimePaid.textContent = DateUtils.formatCurrency(currentYearData.paid);
+
+                // Calculate average daily based on paid shifts
+                const paidShiftsCount = this.paymentCalculator.getCachedShifts().filter(shift => {
+                    const d = DateUtils.parseDateFromInput(shift.date);
+                    return d.getFullYear() === currentYear && this.paymentCalculator.isDatePaid(shift.date);
+                }).length;
+                const yearlyDailyAvg = paidShiftsCount > 0 ? (currentYearData.paid / paidShiftsCount) : 0;
+
+                this.elements.allTimeDailyAvg.textContent = DateUtils.formatCurrency(yearlyDailyAvg);
+
+                // Update Chart Data
+                if (this.earningsChart) {
+                    const currentYear = new Date().getFullYear();
+                    const yearData = this.paymentCalculator.calculateYearlyData(currentYear);
+                    const labels = [];
+                    const dataPoints = [];
+
+                    for (let i = 0; i < 12; i++) {
+                        if (yearData.months[i]) {
+                            labels.push(yearData.months[i].name.substring(0, 3));
+                            dataPoints.push(yearData.months[i].paid);
+                        }
+                    }
+
+                    // Create gradient
+                    const ctx = document.getElementById('earningsChart').getContext('2d');
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+                    gradient.addColorStop(0, '#4361ee');
+                    gradient.addColorStop(1, '#4cc9f0');
+
+                    this.earningsChart.data.labels = labels;
+                    this.earningsChart.data.datasets = [{
+                        label: 'Earnings',
+                        data: dataPoints,
+                        backgroundColor: gradient,
+                        hoverBackgroundColor: '#3f37c9',
+                        borderRadius: 6,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.8
+                    }];
+                    this.earningsChart.update();
+                }
+            }
+
+            renderYearSummary(year) {
+                const yearData = this.paymentCalculator.calculateYearlyData(year);
+
+                let monthsHTML = '';
+
+                for (let i = 0; i < 12; i++) {
+                    if (yearData.months[i]) {
+                        const monthData = yearData.months[i];
+
+                        monthsHTML += `
+                            <div class="year-month-item">
+                                <div class="year-month-header" onclick="window.app.toggleMonthStats(${i})">
+                                    <div class="year-month-title">${monthData.name}</div>
+                                    <div style="font-size: var(--font-sm); color: var(--primary);">
+                                        ${monthData.shifts} shifts, ${DateUtils.formatCurrency(monthData.paid)} paid
+                                    </div>
+                                </div>
+                                <div class="year-month-stats" id="month-stats-${i}">
+                                    <div class="year-stat-item">
+                                        <div class="year-stat-value">${monthData.shifts}</div>
+                                        <div class="year-stat-label">Shifts</div>
+                                    </div>
+                                    <div class="year-stat-item" style="background: rgba(76, 201, 240, 0.15); border-color: var(--success);">
+                                        <div class="year-stat-value" style="color: var(--success);">${DateUtils.formatCurrency(monthData.paid)}</div>
+                                        <div class="year-stat-label">Paid</div>
+                                    </div>
+                                    <div class="year-stat-item">
+                                        <div class="year-stat-value">${DateUtils.formatCurrency(monthData.averageDaily)}</div>
+                                        <div class="year-stat-label">Daily Average</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                this.elements.yearMonthsList.innerHTML = monthsHTML;
+            }
+
+            toggleMonthStats(monthIndex) {
+                const statsElement = document.getElementById(`month-stats-${monthIndex}`);
+                if (statsElement) {
+                    statsElement.classList.toggle('show');
+                }
+            }
+
+            renderProjects() {
+                const sortedProjects = [...this.state.projects].sort((a, b) =>
+                    a.localeCompare(b, 'en', { sensitivity: 'base' })
+                );
+
+                this.elements.projectsList.innerHTML = sortedProjects.map(project => `
+                    <div class="settings-item">
+                        <span>${SecurityUtils.escapeHtml(project)}</span>
+                        <button class="btn btn-outline settings-remove-btn" data-project="${SecurityUtils.escapeHtml(project)}">
+                            Remove
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            renderTasks() {
+                const sortedTasks = [...this.state.tasks].sort((a, b) =>
+                    a.localeCompare(b, 'en', { sensitivity: 'base' })
+                );
+
+                this.elements.tasksList.innerHTML = sortedTasks.map(task => `
+                    <div class="settings-item">
+                        <span>${SecurityUtils.escapeHtml(task)}</span>
+                        <button class="btn btn-outline settings-remove-btn" data-task="${SecurityUtils.escapeHtml(task)}">
+                            Remove
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            updateProjectSelects() {
+                const projectSelects = [
+                    this.elements.projectSelect,
+                    this.elements.editProjectSelect,
+                    this.elements.summaryFilterProject
+                ].filter(Boolean);
+
+                const sortedProjects = [...this.state.projects].sort((a, b) =>
+                    a.localeCompare(b, 'en', { sensitivity: 'base' })
+                );
+
+                projectSelects.forEach(select => {
+                    const currentValue = select.value;
+                    const isFilter = select.id && select.id.includes('Filter');
+
+                    select.innerHTML = (isFilter ? '<option value="All">All Projects</option>' : '<option value="">Select Project</option>') +
+                        sortedProjects.map(project =>
+                            `<option value="${SecurityUtils.escapeHtml(project)}">${SecurityUtils.escapeHtml(project)}</option>`
+                        ).join('');
+
+                    if (currentValue && (sortedProjects.includes(currentValue) || (isFilter && currentValue === 'All'))) {
+                        select.value = currentValue;
+                    } else if (isFilter) {
+                        select.value = 'All';
+                    }
+                });
+
+                const taskSelects = [
+                    this.elements.taskSelect,
+                    this.elements.editTaskSelect,
+                    this.elements.summaryFilterTask
+                ].filter(Boolean);
+
+                const sortedTasks = [...this.state.tasks].sort((a, b) =>
+                    a.localeCompare(b, 'en', { sensitivity: 'base' })
+                );
+
+                taskSelects.forEach(select => {
+                    const currentValue = select.value;
+                    const isFilter = select.id && select.id.includes('Filter');
+
+                    select.innerHTML = (isFilter ? '<option value="All">All Tasks</option>' : '<option value="">Select Task</option>') +
+                        sortedTasks.map(task =>
+                            `<option value="${SecurityUtils.escapeHtml(task)}">${SecurityUtils.escapeHtml(task)}</option>`
+                        ).join('') +
+                        (isFilter ? '' : '<option value="Custom">Custom</option>');
+
+                    if (currentValue && (sortedTasks.includes(currentValue) || (isFilter && currentValue === 'All') || (!isFilter && currentValue === 'Custom'))) {
+                        select.value = currentValue;
+                    } else if (isFilter) {
+                        select.value = 'All';
+                    }
+                });
+            }
+
+            // Validation functions
+            validateShiftForm(date, project, task, customTask = '') {
+                const errors = [];
+
+                if (!date) {
+                    errors.push({ field: 'date', message: 'Date is required' });
+                } else if (!SecurityUtils.validateDateString(date)) {
+                    errors.push({ field: 'date', message: 'Invalid date format or date is in the future' });
+                }
+
+                if (!project) {
+                    errors.push({ field: 'project', message: 'Project is required' });
+                }
+
+                if (!task) {
+                    errors.push({ field: 'task', message: 'Task is required' });
+                } else if (task === 'Custom' && !customTask.trim()) {
+                    errors.push({ field: 'task', message: 'Custom task is required' });
+                }
+
+                return errors;
+            }
+
+            showError(element, message) {
+                element.textContent = message;
+                element.classList.add('show');
+            }
+
+            hideErrors() {
+                const errorElements = document.querySelectorAll('.error-message');
+                errorElements.forEach(element => {
+                    element.classList.remove('show');
+                    element.textContent = '';
+                });
+
+                const inputElements = document.querySelectorAll('.modal-content input, .modal-content select');
+                inputElements.forEach(element => {
+                    element.classList.remove('input-error');
+                });
+            }
+
+            // Shift CRUD operations
+            saveNewShift() {
+                const shiftDateInput = this.elements.shiftDate.value;
+                const project = this.elements.projectSelect.value;
+                const taskSelectValue = this.elements.taskSelect.value;
+                const customTask = this.elements.customTaskInput.value;
+                const notes = this.elements.shiftNotes.value;
+
+                const errors = this.validateShiftForm(shiftDateInput, project, taskSelectValue, customTask);
+
+                if (errors.length > 0) {
+                    UI.showToast('Please fix the highlighted errors', 'error');
+                    errors.forEach(error => {
+                        let el;
+                        if (error.field === 'date') {
+                            this.showError(this.elements.dateError, error.message);
+                            el = this.elements.shiftDate;
+                        } else if (error.field === 'project') {
+                            this.showError(this.elements.projectError, error.message);
+                            el = this.elements.projectSelect;
+                        } else if (error.field === 'task') {
+                            this.showError(this.elements.taskError, error.message);
+                            if (taskSelectValue === 'Custom' && customTask === '') {
+                                el = this.elements.customTaskInput;
+                            } else {
+                                el = this.elements.taskSelect;
+                            }
+                        }
+
+                        if (el) {
+                            // Force animation restart by removing and re-adding class
+                            el.classList.remove('input-error');
+                            void el.offsetWidth; // Trigger reflow
+                            el.classList.add('input-error');
+                        }
+                    });
+                    return;
+                }
+
+                if (this.state.shifts.length >= 1000) {
+                    UI.showToast('Maximum number of shifts reached (1000). Please delete some shifts to add new ones.', 'error');
+                    return;
+                }
+
+                let task;
+                if (taskSelectValue === 'Custom') {
+                    task = SecurityUtils.sanitizeInput(customTask.trim(), 100);
+                } else {
+                    task = taskSelectValue;
+                }
+
+                const newShift = {
+                    id: DateUtils.generateShiftId(this.state.shifts),
+                    date: shiftDateInput,
+                    project: SecurityUtils.sanitizeInput(project, 100),
+                    task: task,
+                    notes: SecurityUtils.sanitizeInput(notes, 500)
+                };
+
+                this.state.shifts.push(newShift);
+                this.state.saveToLocalStorage();
+                this.state.invalidateCache();
+                this.paymentCalculator.invalidateCache();
+
+                this.renderCalendarWeek();
+                this.renderCalendarShifts();
+                this.updateSummary();
+                if (this.state.showUnpaidWeeks) this.renderUnpaidWeeks();
+
+                this.closeModal(this.elements.newShiftModal);
+                this.resetNewShiftForm();
+                UI.showToast('Shift added successfully', 'success');
+            }
+
+            updateShift() {
+                const shiftId = parseInt(this.elements.editShiftId.value);
+                const shiftDateInput = this.elements.editShiftDate.value;
+                const project = this.elements.editProjectSelect.value;
+                const taskSelectValue = this.elements.editTaskSelect.value;
+                const customTask = this.elements.editCustomTaskInput.value;
+                const notes = this.elements.editShiftNotes.value;
+
+                const errors = this.validateShiftForm(shiftDateInput, project, taskSelectValue, customTask);
+
+                if (errors.length > 0) {
+                    UI.showToast('Please fix the highlighted errors', 'error');
+                    errors.forEach(error => {
+                        let el;
+                        if (error.field === 'date') {
+                            this.showError(this.elements.editDateError, error.message);
+                            el = this.elements.editShiftDate;
+                        } else if (error.field === 'project') {
+                            this.showError(this.elements.editProjectError, error.message);
+                            el = this.elements.editProjectSelect;
+                        } else if (error.field === 'task') {
+                            this.showError(this.elements.editTaskError, error.message);
+                            if (taskSelectValue === 'Custom' && customTask === '') {
+                                el = this.elements.editCustomTaskInput;
+                            } else {
+                                el = this.elements.editTaskSelect;
+                            }
+                        }
+
+                        if (el) {
+                            // Force animation restart
+                            el.classList.remove('input-error');
+                            void el.offsetWidth;
+                            el.classList.add('input-error');
+                        }
+                    });
+                    return;
+                }
+
+                let task;
+                if (taskSelectValue === 'Custom') {
+                    task = SecurityUtils.sanitizeInput(customTask.trim(), 100);
+                } else {
+                    task = taskSelectValue;
+                }
+
+                const shiftIndex = this.state.shifts.findIndex(s => s.id === shiftId);
+                if (shiftIndex !== -1) {
+                    this.state.shifts[shiftIndex].date = shiftDateInput;
+                    this.state.shifts[shiftIndex].project = SecurityUtils.sanitizeInput(project, 100);
+                    this.state.shifts[shiftIndex].task = task;
+                    this.state.shifts[shiftIndex].notes = SecurityUtils.sanitizeInput(notes, 500);
+
+                    this.state.saveToLocalStorage();
+                    this.state.invalidateCache();
+                    this.paymentCalculator.invalidateCache();
+
+                    this.renderCalendarWeek();
+                    this.renderCalendarShifts();
+                    this.updateSummary();
+                    this.closeModal(this.elements.editShiftModal);
+
+                    if (this.elements.dayDetailsCard.classList.contains('show') && this.state.selectedCalendarDate) {
+                        const selDate = this.state.selectedCalendarDate;
+                        this.openDayDetails(selDate.getFullYear(), selDate.getMonth(), selDate.getDate());
+                    }
+                    UI.showToast('Shift updated successfully', 'success');
+                }
+            }
+
+            deleteShift(shiftId) {
+                const id = parseInt(shiftId);
+                if (isNaN(id)) {
+                    console.error('Invalid shift ID:', shiftId);
+                    return;
+                }
+
+                UI.confirm('Delete Shift', 'Are you sure you want to delete this shift?', () => {
+                    const initialLength = this.state.shifts.length;
+                    this.state.shifts = this.state.shifts.filter(s => s.id !== id);
+
+                    if (this.state.shifts.length === initialLength) {
+                        // Shift not found, rebuild cache and try again
+                        this.state.invalidateCache();
+                        this.state.shifts = this.state.shifts.filter(s => s.id !== id);
+                    }
+
+                    this.state.saveToLocalStorage();
+                    this.state.invalidateCache();
+                    this.paymentCalculator.invalidateCache();
+
+                    this.renderCalendarWeek();
+                    this.renderCalendarShifts();
+                    this.updateSummary();
+                    if (this.state.showUnpaidWeeks) this.renderUnpaidWeeks();
+
+                    if (this.elements.dayDetailsCard.classList.contains('show') && this.state.selectedCalendarDate) {
+                        const selDate = this.state.selectedCalendarDate;
+                        this.openDayDetails(selDate.getFullYear(), selDate.getMonth(), selDate.getDate());
+                    }
+
+                    UI.showToast('Shift deleted', 'success');
+                });
+            }
+
+            openEditShiftModal(shiftId) {
+                const shift = this.state.shifts.find(s => s.id === shiftId);
+                if (!shift) {
+                    console.error('Shift not found:', shiftId);
+                    return;
+                }
+
+                this.elements.editShiftId.value = shift.id;
+                this.elements.editShiftDate.value = shift.date || '';
+                this.elements.editProjectSelect.value = shift.project || '';
+
+                const originalTask = shift.task;
+                if (this.state.tasks.includes(originalTask)) {
+                    this.elements.editTaskSelect.value = originalTask;
+                    this.elements.editCustomTaskContainer.classList.remove('show');
+                    this.elements.editCustomTaskInput.value = '';
+                } else {
+                    this.elements.editTaskSelect.value = 'Custom';
+                    this.elements.editCustomTaskContainer.classList.add('show');
+                    this.elements.editCustomTaskInput.value = originalTask || '';
+                }
+
+                this.elements.editShiftNotes.value = shift.notes || '';
+                this.openModal(this.elements.editShiftModal);
+            }
+
+            resetNewShiftForm() {
+                this.elements.shiftDate.value = DateUtils.formatDateForInput(new Date());
+                this.elements.projectSelect.value = '';
+                this.elements.taskSelect.value = '';
+                this.elements.customTaskContainer.classList.remove('show');
+                this.elements.customTaskInput.value = '';
+                this.elements.shiftNotes.value = '';
+                this.hideErrors();
+            }
+
+            // Payment Periods
+            renderPaymentPeriodsList() {
+                const sortedPeriods = [...this.state.paymentPeriods].sort((a, b) =>
+                    new Date(b.startDate) - new Date(a.startDate)
+                );
+
+                this.elements.paymentPeriodsList.innerHTML = sortedPeriods.map(period => {
+                    const isEditing = period.editing || false;
+
+                    return `
+                        <div class="period-item">
+                            <div class="period-info">
+                                <div class="period-details">
+                                    <div class="period-dates">
+                                        ${DateUtils.formatDateForDisplay(period.startDate)} - ${DateUtils.formatDateForDisplay(period.endDate)}
+                                    </div>
+                                    <div class="period-description">${SecurityUtils.escapeHtml(period.description || 'No description')}</div>
+                                    <div class="period-amount">${DateUtils.formatCurrency(period.amount)}</div>
+                                </div>
+                                <div class="period-actions">
+                                    <button class="btn-small btn-edit" data-period-id="${period.id}" data-action="edit" title="Edit payment period">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-small btn-delete" data-period-id="${period.id}" title="Delete payment period">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="period-edit-form ${isEditing ? 'show' : ''}" id="edit-form-${period.id}">
+                                <div class="form-group">
+                                    <label>Payment Amount</label>
+                                    <div class="amount-input">
+                                        <span>$</span>
+                                        <input type="number" id="edit-amount-${period.id}" value="${period.amount}" step="0.01" min="0" placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <input type="text" id="edit-description-${period.id}" value="${SecurityUtils.escapeHtml(period.description || '')}" placeholder="Payment description...">
+                                </div>
+                                <div class="period-edit-actions">
+                                    <button class="btn btn-primary" data-period-id="${period.id}" data-action="save-edit">
+                                        <i class="fas fa-save"></i> Save
+                                    </button>
+                                    <button class="btn btn-outline" data-period-id="${period.id}" data-action="cancel-edit">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (sortedPeriods.length === 0) {
+                    this.elements.paymentPeriodsList.innerHTML = `
+                        <div class="empty-state" style="padding: var(--spacing-md);">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <p>No payment periods added yet</p>
+                        </div>
+                    `;
+                }
+            }
+
+            markCurrentWeekPaid() {
+                const amount = parseFloat(this.elements.quickWeekAmount.value);
+
+                if (!amount || amount <= 0) {
+                    UI.showToast('Please enter a valid payment amount', 'error');
+                    return;
+                }
+
+                const weekRange = DateUtils.getWeekRange(this.state.currentCalendarYear, this.state.currentCalendarWeek);
+                const startDate = DateUtils.formatDateForInput(weekRange.start);
+                const endDate = DateUtils.formatDateForInput(weekRange.end);
+
+                const newPeriod = {
+                    id: Date.now(),
+                    startDate,
+                    endDate,
+                    amount,
+                    description: `Week ${this.state.currentCalendarWeek} payment`,
+                    status: 'paid'
+                };
+
+                this.state.paymentPeriods.push(newPeriod);
+                this.state.saveToLocalStorage();
+                this.state.invalidateCache();
+                this.paymentCalculator.invalidateCache();
+
+                this.renderPaymentPeriodsList();
+                this.renderCalendarWeek();
+                this.renderCalendarShifts();
+                this.updateSummary();
+
+                this.elements.quickWeekAmount.value = '';
+
+                UI.showToast(`Week ${this.state.currentCalendarWeek} marked as paid!`, 'success');
+            }
+
+            addPaymentPeriod() {
+                const startDate = this.elements.periodStartDate.value;
+                const endDate = this.elements.periodEndDate.value;
+                const amount = parseFloat(this.elements.periodAmount.value);
+                const description = this.elements.periodDescription.value;
+
+                if (!startDate || !endDate || !amount || amount <= 0) {
+                    UI.showToast('Please fill all required fields with valid values', 'error');
+                    return;
+                }
+
+                if (new Date(startDate) > new Date(endDate)) {
+                    UI.showToast('Start date cannot be after end date', 'error');
+                    return;
+                }
+
+                const newPeriod = {
+                    id: Date.now(),
+                    startDate,
+                    endDate,
+                    amount,
+                    description: SecurityUtils.sanitizeInput(description, 200),
+                    status: 'paid'
+                };
+
+                this.state.paymentPeriods.push(newPeriod);
+                this.state.saveToLocalStorage();
+                this.state.invalidateCache();
+                this.paymentCalculator.invalidateCache();
+
+                this.renderPaymentPeriodsList();
+                this.renderCalendarWeek();
+                this.renderCalendarShifts();
+                this.updateSummary();
+
+                this.elements.periodStartDate.value = '';
+                this.elements.periodEndDate.value = '';
+                this.elements.periodAmount.value = '';
+                this.elements.periodDescription.value = '';
+                UI.showToast('Payment period added successfully!', 'success');
+            }
+
+            editPaymentPeriod(periodId) {
+                this.state.paymentPeriods.forEach(period => {
+                    if (period.id !== parseInt(periodId)) {
+                        period.editing = false;
+                    }
+                });
+
+                const period = this.state.paymentPeriods.find(p => p.id === parseInt(periodId));
+                if (period) {
+                    period.editing = true;
+                    this.renderPaymentPeriodsList();
+                }
+            }
+
+            saveEditedPeriod(periodId) {
+                const amountInput = document.getElementById(`edit-amount-${periodId}`);
+                const descriptionInput = document.getElementById(`edit-description-${periodId}`);
+
+                const amount = parseFloat(amountInput.value);
+                const description = descriptionInput.value.trim();
+
+                if (!amount || amount <= 0) {
+                    UI.showToast('Please enter a valid payment amount', 'error');
+                    return;
+                }
+
+                const period = this.state.paymentPeriods.find(p => p.id === parseInt(periodId));
+                if (period) {
+                    period.amount = amount;
+                    period.description = SecurityUtils.sanitizeInput(description, 200);
+                    period.editing = false;
+
+                    this.state.saveToLocalStorage();
+                    this.state.invalidateCache();
+                    this.paymentCalculator.invalidateCache();
+
+                    this.renderPaymentPeriodsList();
+                    this.renderCalendarWeek();
+                    this.renderCalendarShifts();
+                    this.updateSummary();
+
+                    UI.showToast('Payment period updated successfully!', 'success');
+                }
+            }
+
+            cancelEditPeriod(periodId) {
+                const period = this.state.paymentPeriods.find(p => p.id === parseInt(periodId));
+                if (period) {
+                    period.editing = false;
+                    this.renderPaymentPeriodsList();
+                }
+            }
+
+            deletePaymentPeriod(periodId) {
+                UI.confirm('Delete Period', 'Are you sure you want to delete this payment period?', () => {
+                    this.state.paymentPeriods = this.state.paymentPeriods.filter(p => p.id !== parseInt(periodId));
+                    this.state.saveToLocalStorage();
+                    this.state.invalidateCache();
+                    this.paymentCalculator.invalidateCache();
+
+                    this.renderPaymentPeriodsList();
+                    this.renderCalendarWeek();
+                    this.renderCalendarShifts();
+                    this.updateSummary();
+
+                    UI.showToast('Payment period deleted', 'success');
+                });
+            }
+
+            // Project/Task management
+            addProject() {
+                const projectName = SecurityUtils.sanitizeInput(this.elements.newProject.value.trim(), 50);
+
+                if (!projectName) {
+                    UI.showToast('Please enter a project name', 'error');
+                    return;
+                }
+
+                if (this.state.projects.includes(projectName)) {
+                    UI.showToast('This project already exists!', 'error');
+                    return;
+                }
+
+                this.state.projects.push(projectName);
+                this.state.projects.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+                this.state.saveToLocalStorage();
+
+                this.renderProjects();
+                this.updateProjectSelects();
+                this.elements.newProject.value = '';
+                UI.showToast('Project added successfully!', 'success');
+            }
+
+            removeProject(projectName) {
+                const shiftsUsingProject = this.state.shifts.filter(shift => shift.project === projectName);
+
+                const deleteCallback = () => {
+                    this.state.projects = this.state.projects.filter(p => p !== projectName);
+                    this.state.projects.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+                    this.state.saveToLocalStorage();
+
+                    this.renderProjects();
+                    this.updateProjectSelects();
+                    UI.showToast('Project deleted', 'success');
+                };
+
+                if (shiftsUsingProject.length > 0) {
+                    UI.confirm('Project in Use', `This project is used in ${shiftsUsingProject.length} shift(s). Delete anyway?`, deleteCallback);
+                } else {
+                    deleteCallback();
+                }
+            }
+
+            addTask() {
+                const taskName = SecurityUtils.sanitizeInput(this.elements.newTask.value.trim(), 50);
+
+                if (!taskName) {
+                    UI.showToast('Please enter a task name', 'error');
+                    return;
+                }
+
+                if (this.state.tasks.includes(taskName)) {
+                    UI.showToast('This task already exists!', 'error');
+                    return;
+                }
+
+                this.state.tasks.push(taskName);
+                this.state.tasks.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+                this.state.saveToLocalStorage();
+
+                this.renderTasks();
+                this.updateProjectSelects();
+                this.elements.newTask.value = '';
+                UI.showToast('Task added successfully!', 'success');
+            }
+
+            removeTask(taskName) {
+                const shiftsUsingTask = this.state.shifts.filter(shift => shift.task === taskName);
+
+                const deleteCallback = () => {
+                    this.state.tasks = this.state.tasks.filter(t => t !== taskName);
+                    this.state.tasks.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+                    this.state.saveToLocalStorage();
+
+                    this.renderTasks();
+                    this.updateProjectSelects();
+                    UI.showToast('Task deleted', 'success');
+                };
+
+                if (shiftsUsingTask.length > 0) {
+                    UI.confirm('Task in Use', `This task is used in ${shiftsUsingTask.length} shift(s). Delete anyway?`, deleteCallback);
+                } else {
+                    deleteCallback();
+                }
+            }
+
+            // UI Helpers
+            openModal(modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                // Trap focus in modal
+                const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (focusableElements.length > 0) {
+                    focusableElements[0].focus();
+                }
+            }
+
+            closeModal(modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                this.hideErrors();
+            }
+
+            openPeriodPaymentModal() {
+                this.elements.periodStartDate.value = '';
+                this.elements.periodEndDate.value = '';
+                this.elements.periodAmount.value = '';
+                this.elements.periodDescription.value = '';
+                this.elements.quickWeekAmount.value = '';
+
+                this.renderPaymentPeriodsList();
+                this.openModal(this.elements.periodPaymentModal);
+            }
+
+            switchTab(tabName) {
+                this.elements.tabs.forEach(tab => {
+                    if (tab.getAttribute('data-tab') === tabName) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+
+                if (tabName === 'shifts') {
+                    this.elements.shiftsTab.style.display = 'block';
+                    this.elements.summaryTab.style.display = 'none';
+                } else {
+                    this.elements.shiftsTab.style.display = 'none';
+                    this.elements.summaryTab.style.display = 'block';
+                    this.updateSummary();
+                }
+            }
+
+            openDayDetails(year, month, day) {
+                const date = new Date(year, month, day);
+                const dateString = DateUtils.formatDateForInput(date);
+
+                const cachedShifts = this.paymentCalculator.getCachedShifts();
+                const dayShifts = cachedShifts.filter(shift => shift.date === dateString);
+
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                this.elements.dayDetailsTitle.textContent = date.toLocaleDateString('en-US', options);
+
+                if (dayShifts.length === 0) {
+                    this.elements.dayShiftsList.innerHTML = `
+                        <div class="no-shifts-message">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>No shifts recorded for this day</p>
+                        </div>
+                    `;
+                } else {
+                    this.elements.dayShiftsList.innerHTML = dayShifts.map(shift => `
+                        <div class="swipeable-container">
+                            <div class="swipe-background">
+                                <button class="btn-delete-swipe" data-id="${shift.id}" onclick="event.stopPropagation(); window.app.deleteShift(${shift.id})">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
+                            <div class="swipe-background-edit">
+                                <button class="btn-edit-swipe" data-id="${shift.id}" onclick="event.stopPropagation(); window.app.openEditShiftModal(${shift.id})">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Edit</span>
+                                </button>
+                            </div>
+                            <div class="day-shift-item swipeable-item" style="background-color: var(--card-bg);">
+                                <div class="shift-details">
+                                    <div class="shift-project" title="${SecurityUtils.escapeHtml(shift.project)}">
+                                        ${SecurityUtils.escapeHtml(shift.project)}
+                                    </div>
+                                    <div class="shift-task">${SecurityUtils.escapeHtml(shift.task)}</div>
+                                </div>
+                                ${shift.notes ? `<div class="day-shift-notes">${SecurityUtils.escapeHtml(shift.notes)}</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                this.elements.dayDetailsCard.classList.add('show');
+                this.elements.dayDetailsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            closeDayDetails() {
+                this.elements.dayDetailsCard.classList.remove('show');
+            }
+
+            toggleUnpaidWeeks() {
+                this.state.showUnpaidWeeks = !this.state.showUnpaidWeeks;
+
+                if (this.state.showUnpaidWeeks) {
+                    this.elements.unpaidShiftsBtn.innerHTML = '<i class="fas fa-list"></i> Show All Weeks';
+                    this.elements.unpaidShiftsBtn.classList.remove('btn-outline');
+                    this.elements.unpaidShiftsBtn.classList.add('btn-primary');
+                    this.renderUnpaidWeeks();
+                } else {
+                    this.elements.unpaidShiftsBtn.innerHTML = '<i class="fas fa-money-bill-wave"></i> Show Unpaid Shifts';
+                    this.elements.unpaidShiftsBtn.classList.remove('btn-primary');
+                    this.elements.unpaidShiftsBtn.classList.add('btn-outline');
+                    this.elements.unpaidWeeksList.innerHTML = '';
+                }
+            }
+
+            renderUnpaidWeeks() {
+                const cachedShifts = this.paymentCalculator.getCachedShifts();
+
+                const unpaidShifts = cachedShifts.filter(shift => !this.paymentCalculator.isDatePaid(shift.date));
+
+                if (unpaidShifts.length === 0) {
+                    this.elements.unpaidWeeksList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>All shifts are paid</h3>
+                            <p>No unpaid shifts found</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const unpaidWeeks = {};
+                unpaidShifts.forEach(shift => {
+                    const weekNumber = shift._weekNumber;
+                    const year = shift._year;
+                    const weekKey = `${year}-${weekNumber}`;
+
+                    if (!unpaidWeeks[weekKey]) {
+                        unpaidWeeks[weekKey] = {
+                            year: year,
+                            weekNumber: weekNumber,
+                            shifts: []
+                        };
+                    }
+                    unpaidWeeks[weekKey].shifts.push(shift);
+                });
+
+                const unpaidWeeksListArray = Object.values(unpaidWeeks);
+
+                this.elements.unpaidWeeksList.innerHTML = unpaidWeeksListArray.map(week => {
+                    const weekRange = DateUtils.getWeekRange(week.year, week.weekNumber);
+
+                    return `
+                        <div class="week-section">
+                            <div class="week-header">
+                                <div class="week-title" title="Week ${week.weekNumber} (${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.start))} - ${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.end))})">
+                                    Week ${week.weekNumber} (${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.start))}-${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.end))})
+                                </div>
+                            </div>
+                            <div class="shifts-container">
+                                ${week.shifts.map(shift => this.renderShiftItem(shift)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Backup & Restore
+            exportData() {
+                const data = {
+                    shifts: this.state.shifts,
+                    projects: this.state.projects,
+                    tasks: this.state.tasks,
+                    paymentPeriods: this.state.paymentPeriods,
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `shift-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            exportCsv() {
+                if (this.state.shifts.length === 0) {
+                    UI.showToast('No shifts to export!', 'info');
+                    return;
+                }
+
+                let csvContent = 'Date,Project,Task,Notes\n';
+
+                const sortedShifts = [...this.state.shifts].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                sortedShifts.forEach(shift => {
+                    const date = shift.date;
+                    const project = `"${shift.project.replace(/"/g, '""')}"`;
+                    const task = `"${shift.task.replace(/"/g, '""')}"`;
+                    const notes = `"${(shift.notes || '').replace(/"/g, '""')}"`;
+
+                    csvContent += `${date},${project},${task},${notes}\n`;
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `shift_tracker_export_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                UI.showToast('CSV Exported successfully!', 'success');
+            }
+
+            importData() {
+                this.elements.importFileInput.click();
+            }
+
+            handleImportFile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+
+                        // Validate imported data structure
+                        if (!data.shifts || !Array.isArray(data.shifts) ||
+                            !data.projects || !Array.isArray(data.projects) ||
+                            !data.tasks || !Array.isArray(data.tasks) ||
+                            !data.paymentPeriods || !Array.isArray(data.paymentPeriods)) {
+                            throw new Error('Invalid data format');
+                        }
+
+                        UI.confirm('Import Data', 'This will replace all current data. Are you sure?', () => {
+                            this.state.shifts = data.shifts;
+                            this.state.projects = data.projects;
+                            this.state.tasks = data.tasks;
+                            this.state.paymentPeriods = data.paymentPeriods;
+
+                            this.state.saveToLocalStorage();
+                            this.state.invalidateCache();
+                            this.paymentCalculator.invalidateCache();
+
+                            this.updateProjectSelects();
+                            this.renderProjects();
+                            this.renderTasks();
+                            this.renderCalendarWeek();
+                            this.renderCalendarShifts();
+                            this.updateSummary();
+
+                            UI.showToast('Data imported successfully!', 'success');
+                        });
+                    } catch (error) {
+                        console.error('Error importing data:', error);
+                        UI.showToast('Error importing data. Please check the file format.', 'error');
+                    }
+
+                    // Reset file input
+                    event.target.value = '';
+                };
+                reader.readAsText(file);
+            }
+
+            setupEventListeners() {
+                // UI Filters
+                if (this.elements.summaryFilterProject) {
+                    this.elements.summaryFilterProject.addEventListener('change', () => {
+                        this.paymentCalculator.invalidateCache();
+                        this.updateSummary();
+                    });
+                }
+                if (this.elements.summaryFilterTask) {
+                    this.elements.summaryFilterTask.addEventListener('change', () => {
+                        this.paymentCalculator.invalidateCache();
+                        this.updateSummary();
+                    });
+                }
+
+                // Theme toggle
+                this.elements.themeToggle.addEventListener('click', () => {
+                    const currentThemeClass = document.body.className;
+                    let newTheme;
+
+                    if (currentThemeClass === 'professional-theme') {
+                        newTheme = 'dark-theme';
+                    } else {
+                        newTheme = 'professional-theme';
+                    }
+
+                    this.setTheme(newTheme);
+                });
+
+                // Theme options
+                this.elements.themeOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        const theme = option.getAttribute('data-theme');
+                        this.setTheme(theme);
+                    });
+                });
+
+                // Cache buttons
+                this.elements.rebuildCacheSettingsBtn.addEventListener('click', () => {
+                    this.state.invalidateCache();
+                    this.paymentCalculator.invalidateCache();
+                    this.renderCalendarWeek();
+                    this.renderCalendarShifts();
+                    this.updateSummary();
+                    UI.showToast('Cache rebuilt successfully!', 'success');
+                });
+
+                this.elements.clearCacheSettingsBtn.addEventListener('click', () => {
+                    this.state.shiftsCache = null;
+                    this.paymentCalculator.invalidateCache();
+                    this.renderCalendarWeek();
+                    this.renderCalendarShifts();
+                    this.updateSummary();
+                    UI.showToast('Cache cleared!', 'info');
+                });
+
+                // Calendar navigation
+                this.elements.prevWeekBtn.addEventListener('click', () => this.goToPrevWeek());
+                this.elements.nextWeekBtn.addEventListener('click', () => this.goToNextWeek());
+                this.elements.todayBtn.addEventListener('click', () => this.goToToday());
+
+                // Unpaid shifts
+                this.elements.unpaidShiftsBtn.addEventListener('click', () => this.toggleUnpaidWeeks());
+
+                // Day details
+                this.elements.closeDayDetailsCard.addEventListener('click', () => this.closeDayDetails());
+
+                // Day shifts list event delegation
+                this.elements.dayShiftsList.addEventListener('click', (e) => {
+                    if (e.target.closest('.btn-edit')) {
+                        const shiftId = parseInt(e.target.closest('.btn-edit').getAttribute('data-id'));
+                        if (!isNaN(shiftId)) {
+                            this.closeDayDetails();
+                            this.openEditShiftModal(shiftId);
+                        }
+                    }
+
+                    if (e.target.closest('.btn-delete')) {
+                        const shiftId = parseInt(e.target.closest('.btn-delete').getAttribute('data-id'));
+                        if (!isNaN(shiftId)) {
+                            this.closeDayDetails();
+                            this.deleteShift(shiftId);
+                        }
+                    }
+                });
+
+                // Payment periods
+                this.elements.calendarPaymentBtn.addEventListener('click', () => this.openPeriodPaymentModal());
+                this.elements.closePeriodPaymentModal.addEventListener('click', () => this.closeModal(this.elements.periodPaymentModal));
+                this.elements.addPeriodBtn.addEventListener('click', () => this.addPaymentPeriod());
+                this.elements.markCurrentWeekPaidBtn.addEventListener('click', () => this.markCurrentWeekPaid());
+
+                // Settings
+                this.elements.settingsBtn.addEventListener('click', () => this.openModal(this.elements.settingsModal));
+                this.elements.closeSettingsModal.addEventListener('click', () => this.closeModal(this.elements.settingsModal));
+
+                // New shift
+                this.elements.newShiftBtn.addEventListener('click', () => this.openModal(this.elements.newShiftModal));
+                this.elements.closeNewShiftModal.addEventListener('click', () => this.closeModal(this.elements.newShiftModal));
+                this.elements.saveShiftBtn.addEventListener('click', () => this.saveNewShift());
+
+                // Edit shift
+                this.elements.closeEditShiftModal.addEventListener('click', () => this.closeModal(this.elements.editShiftModal));
+                this.elements.updateShiftBtn.addEventListener('click', () => this.updateShift());
+
+                // Tabs
+                this.elements.tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabName = tab.getAttribute('data-tab');
+                        this.switchTab(tabName);
+                    });
+                });
+
+                // Projects and tasks
+                this.elements.addProjectBtn.addEventListener('click', () => this.addProject());
+                this.elements.addTaskBtn.addEventListener('click', () => this.addTask());
+                this.elements.saveSettingsBtn.addEventListener('click', () => this.closeModal(this.elements.settingsModal));
+
+                // Custom task visibility
+                this.elements.taskSelect.addEventListener('change', () => {
+                    if (this.elements.taskSelect.value === 'Custom') {
+                        this.elements.customTaskContainer.classList.add('show');
+                        this.elements.customTaskInput.focus();
+                    } else {
+                        this.elements.customTaskContainer.classList.remove('show');
+                        this.elements.customTaskInput.value = '';
+                    }
+                });
+
+                this.elements.editTaskSelect.addEventListener('change', () => {
+                    if (this.elements.editTaskSelect.value === 'Custom') {
+                        this.elements.editCustomTaskContainer.classList.add('show');
+                        this.elements.editCustomTaskInput.focus();
+                    } else {
+                        this.elements.editCustomTaskContainer.classList.remove('show');
+                        this.elements.editCustomTaskInput.value = '';
+                    }
+                });
+
+                // Event delegation for dynamic elements
+                const handleEditClick = (e) => {
+                    if (e.target.closest('.btn-edit')) {
+                        const shiftId = parseInt(e.target.closest('.btn-edit').getAttribute('data-id'));
+                        if (!isNaN(shiftId)) {
+                            this.openEditShiftModal(shiftId);
+                        }
+                    }
+                };
+
+                const handleDeleteClick = (e) => {
+                    if (e.target.closest('.btn-delete')) {
+                        const shiftId = parseInt(e.target.closest('.btn-delete').getAttribute('data-id'));
+                        if (!isNaN(shiftId)) {
+                            this.deleteShift(shiftId);
+                        }
+                    }
+                };
+
+                this.elements.calendarWeeksList.addEventListener('click', handleEditClick);
+                this.elements.calendarWeeksList.addEventListener('click', handleDeleteClick);
+
+                this.elements.unpaidWeeksList.addEventListener('click', handleEditClick);
+                this.elements.unpaidWeeksList.addEventListener('click', handleDeleteClick);
+
+                // Payment periods list
+                this.elements.paymentPeriodsList.addEventListener('click', (e) => {
+                    if (e.target.closest('[data-action="edit"]')) {
+                        const periodId = e.target.closest('[data-action="edit"]').getAttribute('data-period-id');
+                        this.editPaymentPeriod(periodId);
+                    }
+
+                    if (e.target.closest('[data-action="save-edit"]')) {
+                        const periodId = e.target.closest('[data-action="save-edit"]').getAttribute('data-period-id');
+                        this.saveEditedPeriod(periodId);
+                    }
+
+                    if (e.target.closest('[data-action="cancel-edit"]')) {
+                        const periodId = e.target.closest('[data-action="cancel-edit"]').getAttribute('data-period-id');
+                        this.cancelEditPeriod(periodId);
+                    }
+
+                    if (e.target.closest('.btn-delete')) {
+                        const periodId = e.target.closest('.btn-delete').getAttribute('data-period-id');
+                        this.deletePaymentPeriod(periodId);
+                    }
+                });
+
+                // Projects and tasks list
+                this.elements.projectsList.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('btn-outline')) {
+                        const projectToRemove = e.target.getAttribute('data-project');
+                        this.removeProject(projectToRemove);
+                    }
+                });
+
+                this.elements.tasksList.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('btn-outline')) {
+                        const taskToRemove = e.target.getAttribute('data-task');
+                        this.removeTask(taskToRemove);
+                    }
+                });
+
+                // Swipe-To-Delete Gestures Implementation
+                let startX = 0;
+                let currentX = 0;
+                let activeSwipeElement = null;
+                let isSwiping = false;
+
+                document.addEventListener('touchstart', (e) => {
+                    const swipeable = e.target.closest('.swipeable-item');
+                    if (swipeable) {
+                        // Close previously open swipe if tapping somewhere else
+                        if (activeSwipeElement && activeSwipeElement !== swipeable) {
+                            activeSwipeElement.style.transform = `translateX(0px)`;
+                        }
+
+                        startX = e.touches[0].clientX;
+                        currentX = startX;
+                        activeSwipeElement = swipeable;
+                        activeSwipeElement.style.transition = 'none';
+                        isSwiping = false;
+                    } else if (activeSwipeElement) {
+                        // Tapped outside completely, close the active swipe
+                        activeSwipeElement.style.transform = `translateX(0px)`;
+                        activeSwipeElement = null;
+                    }
+                }, { passive: true });
+
+                document.addEventListener('touchmove', (e) => {
+                    if (!activeSwipeElement) return;
+                    currentX = e.touches[0].clientX;
+                    const diffX = currentX - startX;
+
+                    if (Math.abs(diffX) > 10) {
+                        isSwiping = true;
+                    }
+
+                    // Allow swipe in both directions up to 100px
+                    if (diffX > -100 && diffX < 100) {
+                        activeSwipeElement.style.transform = `translateX(${diffX}px)`;
+                    }
+                }, { passive: true });
+
+                document.addEventListener('touchend', (e) => {
+                    if (!activeSwipeElement) return;
+                    activeSwipeElement.style.transition = 'transform 0.2s ease-out';
+
+                    const diffX = currentX - startX;
+                    if (diffX < -50) {
+                        // Reveal Delete action
+                        activeSwipeElement.style.transform = `translateX(-80px)`;
+                    } else if (diffX > 50) {
+                        // Reveal Edit action
+                        activeSwipeElement.style.transform = `translateX(80px)`;
+                    } else {
+                        // Snap back
+                        activeSwipeElement.style.transform = `translateX(0px)`;
+                        if (!isSwiping) {
+                            activeSwipeElement = null; // Free it up right away for clicks
+                        }
+                    }
+                });
+
+                // Backup & Restore
+                this.elements.exportDataBtn.addEventListener('click', () => this.exportData());
+                document.getElementById('exportCsvBtn').addEventListener('click', () => this.exportCsv());
+                this.elements.importDataBtn.addEventListener('click', () => this.importData());
+                this.elements.importFileInput.addEventListener('change', (e) => this.handleImportFile(e));
+
+                // Modal close on backdrop click
+                window.addEventListener('click', (event) => {
+                    if (event.target === this.elements.newShiftModal) {
+                        this.closeModal(this.elements.newShiftModal);
+                    }
+                    if (event.target === this.elements.editShiftModal) {
+                        this.closeModal(this.elements.editShiftModal);
+                    }
+                    if (event.target === this.elements.periodPaymentModal) {
+                        this.closeModal(this.elements.periodPaymentModal);
+                    }
+                    if (event.target === this.elements.settingsModal) {
+                        this.closeModal(this.elements.settingsModal);
+                    }
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (event) => {
+                    const activeElement = document.activeElement;
+                    const isInputFocused = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'SELECT');
+
+                    if (event.key === 'Enter') {
+                        // Prevent auto-save when adding newlines in textareas
+                        if (activeElement && activeElement.tagName === 'TEXTAREA') {
+                            return;
+                        }
+
+                        // Prevent duplicate triggering (e.g. keyboard Enter triggering click on focused button)
+                        event.preventDefault();
+
+                        if (this.elements.newShiftModal.classList.contains('active')) {
+                            this.saveNewShift();
+                        } else if (this.elements.editShiftModal.classList.contains('active')) {
+                            this.updateShift();
+                        } else if (this.elements.periodPaymentModal.classList.contains('active')) {
+                            this.addPaymentPeriod();
+                        }
+                    }
+
+                    if (event.key === 'Escape') {
+                        const modals = document.querySelectorAll('.modal.active');
+                        if (modals.length > 0) {
+                            this.closeModal(modals[0]);
+                        }
+                    }
+
+                    // Navigation shortcuts - disabled when typing in inputs
+                    if (!isInputFocused && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                        if (event.key === 'ArrowLeft') {
+                            event.preventDefault();
+                            this.goToPrevWeek();
+                        } else if (event.key === 'ArrowRight') {
+                            event.preventDefault();
+                            this.goToNextWeek();
+                        } else if (event.key === 't' || event.key === 'T') {
+                            event.preventDefault();
+                            this.goToToday();
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new ShiftTrackerApp();
+            window.toggleMonthStats = (monthIndex) => window.app.toggleMonthStats(monthIndex);
+        });
+    </script>
+</body>
+
+</html>
