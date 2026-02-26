@@ -1781,8 +1781,8 @@
                 <button class="btn-icon" id="settingsBtn" aria-label="Settings">
                     <i class="fas fa-cog"></i>
                 </button>
-                <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
-                    <i class="fas fa-moon"></i>
+                <button class="btn-icon" id="refreshBtn" aria-label="Refresh page">
+                    <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
         </header>
@@ -2160,7 +2160,7 @@
                     </button>
                 </div>
                 <input type="file" id="importFileInput" accept=".json" style="display: none;">
-                <small class="form-text">Backup your data regularly to prevent accidental loss.</small>
+                <small class="form-text">Backup your data to prevent accidental loss.</small>
             </div>
 
             <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
@@ -2950,8 +2950,9 @@
             initializeDOMReferences() {
                 // DOM Elements caching
                 this.elements = {
-                    themeToggle: document.getElementById('themeToggle'),
                     settingsBtn: document.getElementById('settingsBtn'),
+                    refreshBtn: document.getElementById('refreshBtn'),
+                    closeSettings: document.getElementById('closeSettings'),
                     newShiftBtn: document.getElementById('newShiftBtn'),
                     newShiftModal: document.getElementById('newShiftModal'),
                     editShiftModal: document.getElementById('editShiftModal'),
@@ -3111,17 +3112,9 @@
 
             setTheme(theme) {
                 document.body.className = theme;
+                // Theme logic kept for settings modal toggles, but removed header icon toggle.
                 this.state.theme = theme;
                 this.state.saveToLocalStorage();
-
-                const icon = this.elements.themeToggle.querySelector('i');
-                if (theme === 'dark-theme') {
-                    icon.classList.remove('fa-moon');
-                    icon.classList.add('fa-sun');
-                } else {
-                    icon.classList.remove('fa-sun');
-                    icon.classList.add('fa-moon');
-                }
 
                 this.elements.themeOptions.forEach(option => {
                     if (option.getAttribute('data-theme') === theme) {
@@ -4491,18 +4484,7 @@
                 }
 
                 // Theme toggle
-                this.elements.themeToggle.addEventListener('click', () => {
-                    const currentThemeClass = document.body.className;
-                    let newTheme;
-
-                    if (currentThemeClass === 'professional-theme') {
-                        newTheme = 'dark-theme';
-                    } else {
-                        newTheme = 'professional-theme';
-                    }
-
-                    this.setTheme(newTheme);
-                });
+                // Removed themeToggle event listener as per instruction.
 
                 // Theme options
                 this.elements.themeOptions.forEach(option => {
@@ -4510,6 +4492,11 @@
                         const theme = option.getAttribute('data-theme');
                         this.setTheme(theme);
                     });
+                });
+
+                // Refresh button
+                this.elements.refreshBtn.addEventListener('click', () => {
+                    location.reload();
                 });
 
                 // Cache buttons
