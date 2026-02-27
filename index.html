@@ -608,6 +608,59 @@
             min-width: 0;
         }
 
+        /* Settings Colorful Sections */
+        .settings-section {
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            border-left-width: 4px;
+        }
+
+        .settings-section-primary {
+            border-left-color: var(--primary);
+        }
+
+        .settings-section-success {
+            border-left-color: var(--success);
+        }
+
+        .settings-section-warning {
+            border-left-color: var(--warning);
+        }
+
+        .settings-section-accent {
+            border-left-color: var(--today);
+        }
+
+        .settings-section>label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: var(--font-md);
+            margin-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .settings-section-primary>label i {
+            color: var(--primary);
+        }
+
+        .settings-section-success>label i {
+            color: var(--success);
+        }
+
+        .settings-section-warning>label i {
+            color: var(--warning);
+        }
+
+        .settings-section-accent>label i {
+            color: var(--today);
+        }
+
         label {
             display: block;
             margin-bottom: 4px;
@@ -684,7 +737,7 @@
         }
 
         .stat-value {
-            font-size: var(--font-md);
+            font-size: var(--font-lg);
             font-weight: 800;
             color: var(--primary);
             margin-bottom: 2px;
@@ -692,7 +745,7 @@
 
         .stat-value.highlight {
             color: var(--success);
-            font-size: var(--font-lg);
+            /* Font size is now universally large */
         }
 
         .stat-value.last-month {
@@ -827,18 +880,32 @@
             margin: 0;
             min-width: 0;
             width: 100%;
-            padding: var(--input-padding);
+            padding: 0 var(--spacing-md);
             border-radius: var(--border-radius);
             border: 1px solid var(--border-color);
             background-color: var(--card-bg);
             color: var(--text-main);
             font-size: var(--font-md);
-            height: var(--element-height);
+            height: var(--element-height) !important;
+            line-height: var(--element-height);
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .settings-input-group input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: inset 0 0 0 1px var(--primary);
+        }
+
+        .settings-input-group .btn {
+            height: var(--element-height) !important;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 var(--spacing-md);
+            box-sizing: border-box;
         }
 
         .settings-remove-btn {
@@ -857,7 +924,7 @@
 
         .theme-option {
             flex: 1;
-            padding: var(--spacing-xs);
+            padding: calc(var(--spacing-xs) / 2) var(--spacing-xs);
             border-radius: var(--border-radius);
             border: 2px solid var(--border-color);
             background: var(--card-bg);
@@ -865,7 +932,8 @@
             transition: var(--transition);
             text-align: center;
             font-weight: 600;
-            height: var(--element-height);
+            height: 32px !important;
+            /* Force exact smaller size */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1402,7 +1470,7 @@
         }
 
         .year-stat-value {
-            font-size: var(--font-sm);
+            font-size: var(--font-lg);
             font-weight: 800;
             color: var(--primary);
             margin-bottom: 2px;
@@ -1417,11 +1485,13 @@
 
         /* Стили для All Time Summary */
         .all-time-summary {
-            background: linear-gradient(135deg, rgba(114, 9, 183, 0.15), rgba(67, 97, 238, 0.15));
+            background-color: var(--card-bg);
             border-left: 4px solid var(--primary);
             border-top: 1px solid var(--border-color);
             border-right: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.08);
+            /* Distinct shadow to make it pop slightly */
         }
 
         .all-time-summary .summary-title {
@@ -2134,16 +2204,16 @@
                 <div class="modal-title">Settings</div>
                 <button class="close-modal" id="closeSettingsModal" aria-label="Close">&times;</button>
             </div>
-            <div class="form-group">
-                <label>Themes</label>
+            <div class="form-group settings-section settings-section-primary">
+                <label><i class="fas fa-palette"></i> Themes</label>
                 <div class="theme-selector">
                     <div class="theme-option active" data-theme="professional-theme">Professional</div>
                     <div class="theme-option" data-theme="dark-theme">Dark</div>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Cache Management</label>
-                <div class="settings-input-group">
+            <div class="form-group settings-section settings-section-accent">
+                <label><i class="fas fa-database"></i> Cache Management</label>
+                <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; margin-bottom: 4px;">
                     <button class="btn btn-outline" id="rebuildCacheSettingsBtn" style="flex: 1;">
                         <i class="fas fa-sync-alt"></i> Rebuild Cache
                     </button>
@@ -2152,28 +2222,33 @@
                     </button>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Projects</label>
-                <div class="settings-input-group">
-                    <input type="text" id="newProject" placeholder="New project name">
-                    <button class="btn btn-outline" id="addProjectBtn">Add</button>
+            <div class="form-group settings-section settings-section-primary">
+                <label><i class="fas fa-briefcase"></i> Projects & Tasks</label>
+                <div style="margin-bottom: var(--spacing-md);">
+                    <label
+                        style="font-size: var(--font-sm); color: var(--text-muted); padding-bottom: 0; border: none; margin-bottom: 4px;">Projects</label>
+                    <div class="settings-input-group">
+                        <input type="text" id="newProject" placeholder="New project name">
+                        <button class="btn btn-outline" id="addProjectBtn">Add</button>
+                    </div>
+                    <div class="settings-list" id="projectsList">
+                    </div>
                 </div>
-                <div class="settings-list" id="projectsList">
+                <div>
+                    <label
+                        style="font-size: var(--font-sm); color: var(--text-muted); padding-bottom: 0; border: none; margin-bottom: 4px;">Tasks</label>
+                    <div class="settings-input-group">
+                        <input type="text" id="newTask" placeholder="New task name">
+                        <button class="btn btn-outline" id="addTaskBtn">Add</button>
+                    </div>
+                    <div class="settings-list" id="tasksList">
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Tasks</label>
-                <div class="settings-input-group">
-                    <input type="text" id="newTask" placeholder="New task name">
-                    <button class="btn btn-outline" id="addTaskBtn">Add</button>
-                </div>
-                <div class="settings-list" id="tasksList">
-                </div>
-            </div>
-            <div class="form-group" style="margin-top: var(--spacing-md);">
-                <label>Data Management</label>
+            <div class="form-group settings-section settings-section-success">
+                <label><i class="fas fa-shield-alt"></i> Data Management</label>
                 <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; margin-bottom: 10px;">
-                    <button type="button" class="btn btn-outline" id="exportDataBtn" style="flex: 1;">
+                    <button type="button" class="btn btn-success" id="exportDataBtn" style="flex: 1;">
                         <i class="fas fa-download"></i> Backup Data
                     </button>
                     <button type="button" class="btn btn-outline" id="importDataBtn" style="flex: 1;">
@@ -2185,8 +2260,8 @@
             </div>
 
             <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
-                <button type="button" class="btn btn-primary" id="exportCsvBtn" style="flex: 1;">
-                    <i class="fas fa-file-csv"></i> Export to CSV
+                <button type="button" class="btn btn-success" id="exportCsvBtn" style="flex: 1;">
+                    <i class="fas fa-file-csv"></i> Export CSV
                 </button>
                 <button type="button" class="btn btn-primary" id="saveSettingsBtn" style="flex: 1;">
                     Close Settings
