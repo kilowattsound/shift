@@ -1856,6 +1856,17 @@
                 right: 40px;
             }
         }
+
+        .task-icon-large {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: var(--primary);
+            opacity: 0.8;
+            padding-left: var(--spacing-sm);
+            align-self: center;
+        }
     </style>
 </head>
 
@@ -2223,10 +2234,8 @@
                 </div>
             </div>
             <div class="form-group settings-section settings-section-primary">
-                <label><i class="fas fa-briefcase"></i> Projects & Tasks</label>
-                <div style="margin-bottom: var(--spacing-md);">
-                    <label
-                        style="font-size: var(--font-sm); color: var(--text-muted); padding-bottom: 0; border: none; margin-bottom: 4px;">Projects</label>
+                <label><i class="fas fa-briefcase"></i> Projects</label>
+                <div>
                     <div class="settings-input-group">
                         <input type="text" id="newProject" placeholder="New project name">
                         <button class="btn btn-outline" id="addProjectBtn">Add</button>
@@ -2234,9 +2243,10 @@
                     <div class="settings-list" id="projectsList">
                     </div>
                 </div>
+            </div>
+            <div class="form-group settings-section settings-section-primary">
+                <label><i class="fas fa-tasks"></i> Tasks</label>
                 <div>
-                    <label
-                        style="font-size: var(--font-sm); color: var(--text-muted); padding-bottom: 0; border: none; margin-bottom: 4px;">Tasks</label>
                     <div class="settings-input-group">
                         <input type="text" id="newTask" placeholder="New task name">
                         <button class="btn btn-outline" id="addTaskBtn">Add</button>
@@ -2292,6 +2302,31 @@
 
     <script>
         class UI {
+            static getTaskIcon(taskName) {
+                if (!taskName) return 'fa-clipboard-list';
+                const icons = {
+                    'baseboard': 'fa-ruler-horizontal',
+                    'caulking and sealing': 'fa-fill-drip',
+                    'demolition': 'fa-hammer',
+                    'door installation': 'fa-door-open',
+                    'drywall': 'fa-cube',
+                    'dumping garbage': 'fa-trash-can',
+                    'electrical': 'fa-bolt',
+                    'flooring': 'fa-border-all',
+                    'framing': 'fa-crop-simple',
+                    'hvac': 'fa-fan',
+                    'miscellaneous': 'fa-list',
+                    'painting': 'fa-paint-roller',
+                    'plumbing': 'fa-wrench',
+                    'quarter round': 'fa-circle-notch',
+                    'site clean up': 'fa-broom',
+                    'tile work': 'fa-border-none',
+                    'trim work': 'fa-cut',
+                    'van work': 'fa-van-truck'
+                };
+                return icons[taskName.toLowerCase()] || 'fa-clipboard-list';
+            }
+
             static showToast(message, type = 'info') {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
@@ -3413,6 +3448,9 @@
                                 </div>
                                 ${shift.notes ? `<div class="shift-notes">${SecurityUtils.escapeHtml(shift.notes)}</div>` : ''}
                             </div>
+                            <div class="task-icon-large">
+                                <i class="fas ${UI.getTaskIcon(shift.task)}"></i>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -4390,6 +4428,9 @@
                                     <div class="shift-task">${SecurityUtils.escapeHtml(shift.task)}</div>
                                 </div>
                                 ${shift.notes ? `<div class="day-shift-notes">${SecurityUtils.escapeHtml(shift.notes)}</div>` : ''}
+                            </div>
+                            <div class="task-icon-large">
+                                <i class="fas ${UI.getTaskIcon(shift.task)}"></i>
                             </div>
                         </div>
                     `).join('');
