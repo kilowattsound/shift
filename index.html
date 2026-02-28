@@ -55,6 +55,9 @@
             --element-height-lg: 48px;
 
             --input-padding: 0 var(--spacing-sm);
+
+            /* Variables for Light mode glassmorphism fallback parsing */
+            --card-bg-rgb: 255, 255, 255;
         }
 
         .dark-theme {
@@ -70,6 +73,10 @@
             --warning: #DC2626;
             --today: #D97706;
             --danger: #DC2626;
+
+            --card-bg-rgb: 30, 41, 59;
+            /* For glassmorphism */
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         .professional-theme {
@@ -121,8 +128,14 @@
             align-items: center;
             padding: var(--spacing-sm);
             margin-bottom: var(--spacing-lg);
-            background: var(--card-bg);
+            background: rgba(var(--card-bg-rgb, 255, 255, 255), 0.85);
+            /* Fallback rgb */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         h1 {
@@ -286,11 +299,257 @@
             border-radius: var(--border-radius);
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            transition: var(--transition);
+            transition: var(--transition), transform 0.2s ease;
             gap: var(--spacing-sm);
             box-shadow: var(--shadow);
             position: relative;
-            overflow: hidden;
+            transform: translateY(0);
+        }
+
+        .todo-summary-card {
+            background: var(--bg-secondary);
+            border: 1px dashed var(--primary);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            transition: var(--transition);
+            animation: slideUpFade 0.4s ease forwards;
+        }
+
+        .todo-summary-card:hover {
+            border-style: solid;
+            background: var(--card-bg);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .todo-summary-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(var(--primary-rgb, 74, 144, 226), 0.1);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .todo-summary-info {
+            flex: 1;
+        }
+
+        .todo-summary-project {
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .todo-summary-text {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .todo-summary-arrow {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+
+
+        .project-progress {
+            font-size: 0.8rem;
+            color: var(--accent-color, var(--text-muted));
+            font-weight: 700;
+            background: rgba(var(--accent-rgb, 148, 163, 184), 0.15);
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(var(--accent-rgb, 148, 163, 184), 0.3);
+        }
+
+        .group-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-group-action {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .btn-group-action:hover {
+            background: rgba(var(--primary-rgb, 74, 144, 226), 0.1);
+        }
+
+        .btn-group-action.danger {
+            color: var(--danger);
+        }
+
+        .btn-group-action.danger:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .list-item-delete {
+            opacity: 0;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .list-item:hover .list-item-delete {
+            opacity: 0.6;
+        }
+
+        .list-item-delete:hover {
+            opacity: 1 !important;
+            color: var(--danger) !important;
+            background: rgba(220, 53, 69, 0.1) !important;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-color, var(--border-color));
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .list-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: rgba(var(--accent-rgb, 74, 144, 226), 0.3);
+        }
+
+        .list-item.completed {
+            opacity: 0.5;
+            background: rgba(0, 0, 0, 0.02);
+            box-shadow: none;
+            border-left-color: var(--border-color);
+        }
+
+        .list-item.completed:hover {
+            transform: none;
+            border-color: var(--border-color);
+        }
+
+        .list-item.completed .list-item-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .list-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .list-item.completed .list-checkbox {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            /* Starts hidden until animation kicks in */
+        }
+
+        /* Generate stagger delays for up to 20 items */
+        .delay-0 {
+            animation-delay: 0.00s;
+        }
+
+        .delay-1 {
+            animation-delay: 0.04s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.08s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.12s;
+        }
+
+        .delay-4 {
+            animation-delay: 0.16s;
+        }
+
+        .delay-5 {
+            animation-delay: 0.20s;
+        }
+
+        .delay-6 {
+            animation-delay: 0.24s;
+        }
+
+        .delay-7 {
+            animation-delay: 0.28s;
+        }
+
+        .delay-8 {
+            animation-delay: 0.32s;
+        }
+
+        .delay-9 {
+            animation-delay: 0.36s;
+        }
+
+        .delay-10 {
+            animation-delay: 0.40s;
         }
 
         .shift-date-container {
@@ -507,27 +766,41 @@
 
         .floating-button {
             position: fixed;
-            bottom: calc(24px + env(safe-area-inset-bottom));
-            right: 24px;
+            bottom: calc(var(--element-height-lg) + var(--spacing-xl));
+            right: var(--spacing-lg);
             width: 56px;
             height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary));
+            border-radius: 28px;
+            background-color: rgba(30, 41, 59, 0.9);
+            /* Primary color but slightly transparent */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: white;
-            border: none;
-            font-size: var(--font-lg);
-            box-shadow: var(--shadow);
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-            z-index: 1000;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s;
         }
 
-        .floating-button:hover {
-            transform: scale(1.08) translateY(-4px);
-            box-shadow: var(--shadow);
+        .dark-theme .floating-button {
+            background-color: rgba(71, 85, 105, 0.9);
+            /* Lighter for dark mode */
+        }
+
+        .floating-button:active {
+            transform: scale(0.92);
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .floating-button:hover {
+                transform: scale(1.05) translateY(-2px);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            }
         }
 
         .modal {
@@ -1125,6 +1398,8 @@
             letter-spacing: 0.5px;
         }
 
+
+
         .calendar-day.active .day-name {
             color: var(--primary);
             font-weight: 700;
@@ -1378,36 +1653,13 @@
         .day-shifts-list {
             max-height: 400px;
             overflow-y: auto;
+            display: flex;
+            /* match shifts-container */
+            flex-direction: column;
+            gap: var(--spacing-xs);
         }
 
-        .day-shift-item {
-            padding: var(--spacing-sm);
-            border-radius: var(--border-radius);
-            margin-bottom: var(--spacing-xs);
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-        }
 
-        .day-shift-project {
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 2px;
-        }
-
-        .day-shift-task {
-            font-size: var(--font-sm);
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-
-        .day-shift-notes {
-            font-size: var(--font-xs);
-            color: var(--text-muted);
-            font-style: italic;
-        }
 
         .no-shifts-message {
             text-align: center;
@@ -1535,13 +1787,32 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(-5px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
             }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .tab-pane {
+            display: none;
+            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .tab-pane.active-tab {
+            display: block;
         }
 
         .btn-small {
@@ -1563,7 +1834,7 @@
         }
 
         .swipeable-container .shift-item,
-        .swipeable-container .day-shift-item {
+        .swipeable-container .day-shift-item-container {
             margin-bottom: 0;
             /* Override existing margins for smooth swiping */
             position: relative;
@@ -1667,6 +1938,26 @@
                 flex-direction: column;
             }
 
+            /* Card Action Buttons (always visible now) */
+            .desktop-actions {
+                display: flex;
+                gap: var(--spacing-sm);
+                margin-top: var(--spacing-xs);
+                width: 100%;
+                flex: 1 1 100%;
+                justify-content: flex-end;
+                border-top: 1px solid var(--border-color);
+                padding-top: var(--spacing-sm);
+                flex-direction: row;
+            }
+
+            /* Disable swipe hint when we have explicit buttons */
+            .swipe-hint {
+                display: none !important;
+            }
+
+            /* Touch devices will also just see the standard buttons now in the day details view */
+
             .calendar-header {
                 flex-wrap: wrap;
             }
@@ -1723,6 +2014,15 @@
                 padding-left: max(var(--spacing-sm), env(safe-area-inset-left));
                 padding-right: max(var(--spacing-sm), env(safe-area-inset-right));
             }
+        }
+
+        .swipeable-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            touch-action: pan-y;
+            overflow: visible;
+            /* removed overflow hidden to allow desktop overlays */
         }
 
         .sr-only {
@@ -1812,12 +2112,50 @@
             opacity: 0.7;
         }
 
-        /* Desktop and Tablet Layout Grid */
-        @media (min-width: 768px) {
+        /* Tablet Layout Grid (Medium Width) */
+        @media (min-width: 768px) and (max-width: 1023px) {
             .container {
-                max-width: 1200px;
+                max-width: 1000px;
                 display: grid;
                 grid-template-columns: 1fr 1fr;
+                gap: var(--spacing-lg);
+                padding: var(--spacing-lg);
+                align-items: start;
+            }
+
+            header {
+                grid-column: 1 / -1;
+                margin-bottom: 0;
+            }
+
+            .tabs {
+                display: none !important;
+            }
+
+            /* Stack Lists directly under Shifts on the left side */
+            #shiftsTab,
+            #listsTab {
+                display: block !important;
+                grid-column: 1 / 2;
+                height: auto;
+            }
+
+            /* Push Summary to the right side and let it span */
+            #summaryTab {
+                display: block !important;
+                grid-column: 2 / 3;
+                grid-row: 2 / 4;
+                /* Spam vertically across shifts and lists rows */
+                height: 100%;
+            }
+        }
+
+        /* Desktop Layout Grid */
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1400px;
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
                 gap: var(--spacing-xl);
                 padding: var(--spacing-xl);
                 align-items: start;
@@ -1833,8 +2171,9 @@
                 display: none !important;
             }
 
-            /* Force both tabs to be visible */
+            /* Force all tabs to be visible on desktop */
             #shiftsTab,
+            #listsTab,
             #summaryTab {
                 display: block !important;
                 height: 100%;
@@ -1891,10 +2230,11 @@
 
         <div class="tabs">
             <div class="tab active" data-tab="shifts">Shifts</div>
+            <div class="tab" data-tab="lists">Lists</div>
             <div class="tab" data-tab="summary">Summary</div>
         </div>
 
-        <div id="shiftsTab" class="tab-content">
+        <div id="shiftsTab" class="tab-pane active-tab">
             <div class="calendar-view">
                 <div class="calendar-week-navigation">
                     <div class="calendar-header">
@@ -1943,7 +2283,35 @@
             </div>
         </div>
 
-        <div id="summaryTab" class="tab-content" style="display: none;">
+        <div id="listsTab" class="tab-pane">
+            <div class="summary-card" style="margin-bottom: var(--spacing-md); padding: var(--spacing-md);">
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <select id="listFilterProject" class="input-field" style="flex: 1;">
+                        <option value="All">All Projects</option>
+                    </select>
+                </div>
+
+                <!-- Quick Add Form -->
+                <div style="display: flex; gap: 8px; margin-bottom: var(--spacing-lg); align-items: stretch;">
+                    <input type="text" id="newListItemText" placeholder="Add a new to-do or shopping item..."
+                        style="flex: 1;" autocomplete="off">
+                    <button class="btn btn-outline" id="addListItemBtn"
+                        style="min-width: 60px; height: var(--element-height);">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div id="listsContainer">
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list empty-state-icon"></i>
+                        <h3>Nothing to do</h3>
+                        <p>Select a project above and add items you need to buy or complete.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="summaryTab" class="tab-pane">
 
 
             <button class="btn btn-outline unpaid-shifts-btn" id="unpaidShiftsBtn">
@@ -2392,6 +2760,7 @@
                 this.projects = [];
                 this.tasks = [];
                 this.paymentPeriods = [];
+                this.lists = [];
                 this.theme = 'professional-theme';
                 this.shiftsCache = null;
                 this.cacheEnabled = true;
@@ -2411,6 +2780,7 @@
                     this.projects = this.getFromLocalStorage('projects', ['Residential Building A', 'Commercial Complex B']);
                     this.tasks = this.getFromLocalStorage('tasks', ['Plumbing', 'Framing', 'Electrical', 'Painting']);
                     this.paymentPeriods = this.getFromLocalStorage('paymentPeriods', []);
+                    this.lists = this.getFromLocalStorage('lists', []);
 
                     // Theme detection logic
                     const savedTheme = localStorage.getItem('theme');
@@ -2456,6 +2826,7 @@
                     localStorage.setItem('projects', JSON.stringify(this.projects));
                     localStorage.setItem('tasks', JSON.stringify(this.tasks));
                     localStorage.setItem('paymentPeriods', JSON.stringify(this.paymentPeriods));
+                    localStorage.setItem('lists', JSON.stringify(this.lists));
                     localStorage.setItem('theme', this.theme);
                     return true;
                 } catch (error) {
@@ -3111,9 +3482,15 @@
 
                     tabs: document.querySelectorAll('.tab'),
                     shiftsTab: document.getElementById('shiftsTab'),
+                    listsTab: document.getElementById('listsTab'),
                     summaryTab: document.getElementById('summaryTab'),
                     summaryFilterProject: document.getElementById('summaryFilterProject'),
                     summaryFilterTask: document.getElementById('summaryFilterTask'),
+
+                    listFilterProject: document.getElementById('listFilterProject'),
+                    newListItemText: document.getElementById('newListItemText'),
+                    addListItemBtn: document.getElementById('addListItemBtn'),
+                    listsContainer: document.getElementById('listsContainer'),
 
                     addProjectBtn: document.getElementById('addProjectBtn'),
                     addTaskBtn: document.getElementById('addTaskBtn'),
@@ -3238,6 +3615,7 @@
                         this.renderCalendarWeek();
                         this.renderCalendarShifts();
                         this.updateSummary();
+                        this.renderLists();
 
                         // Add observer for state changes
                         this.state.addObserver(() => {
@@ -3341,7 +3719,12 @@
 
                     dayElement.addEventListener('click', () => {
                         this.state.selectedCalendarDate = day;
-                        this.renderCalendarWeek();
+
+                        // Immediately update visual state without full re-render
+                        const allDays = this.elements.calendarDays.querySelectorAll('.calendar-day');
+                        allDays.forEach(el => el.classList.remove('active'));
+                        dayElement.classList.add('active');
+
                         this.openDayDetails(day.getFullYear(), day.getMonth(), day.getDate());
                     });
 
@@ -3358,14 +3741,6 @@
                         shift._year === this.state.currentCalendarYear;
                 });
 
-                if (weekShifts.length === 0) {
-                    this.elements.calendarWeeksList.innerHTML = '';
-                    this.elements.calendarEmptyState.style.display = 'block';
-                    return;
-                }
-
-                this.elements.calendarEmptyState.style.display = 'none';
-
                 const weekRange = DateUtils.getWeekRange(this.state.currentCalendarYear, this.state.currentCalendarWeek);
 
                 const weekSection = document.createElement('div');
@@ -3374,7 +3749,7 @@
                 const weekHeader = document.createElement('div');
                 weekHeader.className = 'week-header';
 
-                const isWeekPaid = weekShifts.every(shift => this.paymentCalculator.isDatePaid(shift.date));
+                const isWeekPaid = weekShifts.length > 0 && weekShifts.every(shift => this.paymentCalculator.isDatePaid(shift.date));
 
                 weekHeader.innerHTML = `
                     <div class="week-title" title="Week ${this.state.currentCalendarWeek} (${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.start))} - ${DateUtils.formatDateForDisplay(DateUtils.formatDateForInput(weekRange.end))})">
@@ -3396,11 +3771,25 @@
                     return new Date(a.date) - new Date(b.date);
                 });
 
-                const shiftsHTML = sortedShifts.map(shift => {
-                    return this.renderShiftItem(shift);
+                // Get all projects with pending tasks (global)
+                const pendingProjects = [...new Set(this.state.lists.filter(item => !item.isCompleted).map(item => item.project))];
+                const todoCardsHTML = pendingProjects.sort().map(project => {
+                    return this.renderProjectToDoCard(project);
+                }).filter(html => html !== '').join('');
+
+                if (sortedShifts.length === 0 && todoCardsHTML === '') {
+                    this.elements.calendarEmptyState.style.display = 'block';
+                    this.elements.calendarWeeksList.innerHTML = '';
+                    return;
+                }
+
+                this.elements.calendarEmptyState.style.display = 'none';
+
+                const shiftsHTML = sortedShifts.map((shift, index) => {
+                    return this.renderShiftItem(shift, index);
                 }).join('');
 
-                shiftsContainer.innerHTML = shiftsHTML;
+                shiftsContainer.innerHTML = shiftsHTML + todoCardsHTML;
 
                 weekSection.appendChild(weekHeader);
                 weekSection.appendChild(shiftsContainer);
@@ -3409,7 +3798,27 @@
                 this.elements.calendarWeeksList.appendChild(weekSection);
             }
 
-            renderShiftItem(shift) {
+            renderProjectToDoCard(project) {
+                const pendingItems = this.state.lists.filter(item => item.project === project && !item.isCompleted);
+                if (pendingItems.length === 0) return '';
+
+                return `
+                    <div class="todo-summary-card animate-in" onclick="window.app.switchTab('lists'); document.getElementById('listFilterProject').value = '${SecurityUtils.escapeHtml(project)}'; window.app.renderLists();">
+                        <div class="todo-summary-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div class="todo-summary-info">
+                            <div class="todo-summary-project">${SecurityUtils.escapeHtml(project)} Tasks</div>
+                            <div class="todo-summary-text">${pendingItems.length} pending ${pendingItems.length === 1 ? 'item' : 'items'} to complete</div>
+                        </div>
+                        <div class="todo-summary-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderShiftItem(shift, itemIndex = 0) {
                 const shiftDate = DateUtils.parseDateFromInput(shift.date);
                 const paymentStatus = this.paymentCalculator.getDatePaymentStatus(shift.date);
 
@@ -3418,8 +3827,11 @@
                     dateCircleClass += ' paid';
                 }
 
+                // Max delay is 10 for staggering
+                const delayClass = `delay-${Math.min(itemIndex, 10)}`;
+
                 return `
-                    <div class="swipeable-container">
+                    <div class="swipeable-container animate-in ${delayClass}">
                         <div class="swipe-background">
                             <button class="btn-delete-swipe" data-id="${shift.id}" onclick="event.stopPropagation(); window.app.deleteShift(${shift.id})">
                                 <i class="fas fa-trash"></i>
@@ -3737,10 +4149,17 @@
                 const projectSelects = [
                     this.elements.projectSelect,
                     this.elements.editProjectSelect,
-                    this.elements.summaryFilterProject
+                    this.elements.summaryFilterProject,
+                    this.elements.listFilterProject
                 ].filter(Boolean);
 
-                const sortedProjects = [...this.state.projects].sort((a, b) =>
+                // Merge explicitly saved projects with any historical projects still attached to shifts
+                const activeProjects = new Set(this.state.projects);
+                this.state.shifts.forEach(s => {
+                    if (s.project) activeProjects.add(s.project);
+                });
+
+                const sortedProjects = [...activeProjects].sort((a, b) =>
                     a.localeCompare(b, 'en', { sensitivity: 'base' })
                 );
 
@@ -3766,7 +4185,13 @@
                     this.elements.summaryFilterTask
                 ].filter(Boolean);
 
-                const sortedTasks = [...this.state.tasks].sort((a, b) =>
+                // Merge explicitly saved tasks with any historical tasks still attached to shifts
+                const activeTasks = new Set(this.state.tasks);
+                this.state.shifts.forEach(s => {
+                    if (s.task && s.task !== 'Custom') activeTasks.add(s.task);
+                });
+
+                const sortedTasks = [...activeTasks].sort((a, b) =>
                     a.localeCompare(b, 'en', { sensitivity: 'base' })
                 );
 
@@ -4341,6 +4766,192 @@
                 }
             }
 
+            // --- Lists Feature ---
+
+            renderLists() {
+                const projectFilter = this.elements.listFilterProject.value;
+
+                let filteredLists = this.state.lists;
+                if (projectFilter !== 'All') {
+                    filteredLists = filteredLists.filter(item => item.project === projectFilter);
+                }
+
+                if (filteredLists.length === 0) {
+                    this.elements.listsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list empty-state-icon"></i>
+                            <h3>Nothing to do</h3>
+                            <p>Select a project above and add items you need to buy or complete.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Group by project
+                const groupedLists = {};
+                filteredLists.forEach(item => {
+                    if (!groupedLists[item.project]) {
+                        groupedLists[item.project] = [];
+                    }
+                    groupedLists[item.project].push(item);
+                });
+
+                // Vibrant Color System
+                const getProjectColor = (name) => {
+                    const colors = [
+                        { hex: '#3B82F6', rgb: '59, 130, 246' }, // Blue
+                        { hex: '#10B981', rgb: '16, 185, 129' }, // Emerald
+                        { hex: '#8B5CF6', rgb: '139, 92, 246' }, // Violet
+                        { hex: '#F59E0B', rgb: '245, 158, 11' }, // Amber
+                        { hex: '#EF4444', rgb: '239, 68, 68' },  // Red
+                        { hex: '#06B6D4', rgb: '6, 182, 212' },  // Cyan
+                        { hex: '#EC4899', rgb: '236, 72, 153' }  // Pink
+                    ];
+                    // Simple hash for consistent coloring
+                    let hash = 0;
+                    for (let i = 0; i < name.length; i++) {
+                        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                    }
+                    return colors[Math.abs(hash) % colors.length];
+                };
+
+                // Render groups
+                this.elements.listsContainer.innerHTML = Object.keys(groupedLists).sort().map(project => {
+                    const items = groupedLists[project];
+                    const completedCount = items.filter(i => i.isCompleted).length;
+                    const totalCount = items.length;
+                    const allCompleted = completedCount === totalCount;
+                    const accent = getProjectColor(project);
+
+                    return `
+                        <div style="margin-bottom: var(--spacing-lg); --accent-color: ${accent.hex}; --accent-rgb: ${accent.rgb};">
+                            <div style="display: flex; align-items: center; margin-bottom: var(--spacing-sm); border-bottom: 2px solid rgba(${accent.rgb}, 0.2); padding-bottom: 8px;">
+                                <h4 style="color: var(--accent-color); font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.8px; margin: 0; font-weight: 800;">${SecurityUtils.escapeHtml(project)}</h4>
+                                <div class="group-actions">
+                                    <span class="project-progress">${completedCount}/${totalCount} Done</span>
+                                    
+                                    ${!allCompleted && completedCount > 0 ? `
+                                        <button class="btn-group-action" onclick="window.app.clearCompleted('${SecurityUtils.escapeHtml(project).replace(/'/g, "\\'")}')" title="Clear all completed items">
+                                            <i class="fas fa-broom"></i>
+                                            Clear
+                                        </button>
+                                    ` : ''}
+
+                                    ${allCompleted ? `
+                                        <button class="btn-group-action" style="color: var(--success);" onclick="window.app.deleteProjectGroup('${SecurityUtils.escapeHtml(project).replace(/'/g, "\\'")}')" title="Archive completed list">
+                                            <i class="fas fa-check-double"></i>
+                                            Archive
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="list-items-stack" style="display: flex; flex-direction: column; gap: 8px;">
+                                ${items.map((item, index) => `
+                                    <div class="list-item animate-in delay-${Math.min(index, 19)} ${item.isCompleted ? 'completed' : ''}">
+                                        <div style="display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; padding-right: var(--spacing-sm);" onclick="window.app.toggleListItem(${item.id})">
+                                            <div class="list-checkbox" style="${item.isCompleted ? `background: var(--accent-color); border-color: var(--accent-color);` : `border-color: rgba(${accent.rgb}, 0.4);`}">
+                                                ${item.isCompleted ? '<i class="fas fa-check" style="color: white; font-size: 10px;"></i>' : ''}
+                                            </div>
+                                            <span class="list-item-text" style="word-break: break-word; font-weight: 500;">${SecurityUtils.escapeHtml(item.text)}</span>
+                                        </div>
+                                        <button class="list-item-delete" onclick="window.app.deleteListItem(${item.id})" title="Delete item">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // --- Lists Feature ---
+
+            addListItem() {
+                const text = SecurityUtils.sanitizeInput(this.elements.newListItemText.value.trim(), 200);
+                const project = this.elements.listFilterProject.value;
+
+                if (!text) {
+                    UI.showToast('Please enter an item description.', 'error');
+                    return;
+                }
+                if (project === 'All') {
+                    UI.showToast('Please select a specific project before adding an item.', 'error');
+                    return;
+                }
+
+                const newItem = {
+                    id: Date.now(),
+                    text: text,
+                    project: project,
+                    isCompleted: false,
+                    createdAt: new Date().toISOString()
+                };
+
+                this.state.lists.push(newItem);
+                this.state.saveToLocalStorage();
+
+                this.elements.newListItemText.value = '';
+                this.renderLists();
+                this.renderCalendarShifts();
+                UI.showToast('Item added.', 'success');
+            }
+
+            toggleListItem(id) {
+                const item = this.state.lists.find(i => i.id === parseInt(id));
+                if (item) {
+                    item.isCompleted = !item.isCompleted;
+                    this.state.saveToLocalStorage();
+                    this.renderLists();
+                    this.renderCalendarShifts();
+                }
+            }
+
+            deleteListItem(id) {
+                const itemToDelete = this.state.lists.find(i => i.id === parseInt(id));
+                if (!itemToDelete) return;
+
+                UI.confirm(
+                    'Delete Item?',
+                    `Are you sure you want to delete "${SecurityUtils.escapeHtml(itemToDelete.text)}"?`,
+                    () => {
+                        this.state.lists = this.state.lists.filter(i => i.id !== parseInt(id));
+                        this.state.saveToLocalStorage();
+                        this.renderLists();
+                        this.renderCalendarShifts();
+                        UI.showToast('Item deleted.', 'info');
+                    }
+                );
+            }
+
+            clearCompleted(project) {
+                UI.confirm(
+                    'Clear Completed?',
+                    `Delete all completed items for ${project}?`,
+                    () => {
+                        this.state.lists = this.state.lists.filter(item => !(item.project === project && item.isCompleted));
+                        this.state.saveToLocalStorage();
+                        this.renderLists();
+                        this.renderCalendarShifts();
+                        UI.showToast('Completed items cleared.', 'success');
+                    }
+                );
+            }
+
+            deleteProjectGroup(project) {
+                UI.confirm(
+                    'Delete Group?',
+                    `Are you sure you want to delete the whole "${project}" task group?`,
+                    () => {
+                        this.state.lists = this.state.lists.filter(item => item.project !== project);
+                        this.state.saveToLocalStorage();
+                        this.renderLists();
+                        this.renderCalendarShifts();
+                        UI.showToast('Project group deleted.', 'info');
+                    }
+                );
+            }
+
             // UI Helpers
             openModal(modal) {
                 modal.classList.add('active');
@@ -4378,12 +4989,19 @@
                     }
                 });
 
+                // Hide all
+                this.elements.shiftsTab.classList.remove('active-tab');
+                this.elements.listsTab.classList.remove('active-tab');
+                this.elements.summaryTab.classList.remove('active-tab');
+
+                // Show selected
                 if (tabName === 'shifts') {
-                    this.elements.shiftsTab.style.display = 'block';
-                    this.elements.summaryTab.style.display = 'none';
-                } else {
-                    this.elements.shiftsTab.style.display = 'none';
-                    this.elements.summaryTab.style.display = 'block';
+                    this.elements.shiftsTab.classList.add('active-tab');
+                } else if (tabName === 'lists') {
+                    this.elements.listsTab.classList.add('active-tab');
+                    this.renderLists(); // We'll add this later
+                } else if (tabName === 'summary') {
+                    this.elements.summaryTab.classList.add('active-tab');
                     this.updateSummary();
                 }
             }
@@ -4400,12 +5018,20 @@
 
                 if (dayShifts.length === 0) {
                     this.elements.dayShiftsList.innerHTML = `
-                        <div class="no-shifts-message">
-                            <i class="fas fa-calendar-times"></i>
-                            <p>No shifts recorded for this day</p>
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-plus empty-state-icon"></i>
+                            <h3>No Shifts Yet</h3>
+                            <p>Tap the + button to record a shift for this day.</p>
                         </div>
                     `;
                 } else {
+                    const shiftDate = date;
+                    const paymentStatus = this.paymentCalculator.getDatePaymentStatus(dateString);
+                    let dateCircleClass = 'shift-date-circle';
+                    if (paymentStatus === 'paid') {
+                        dateCircleClass += ' paid';
+                    }
+
                     this.elements.dayShiftsList.innerHTML = dayShifts.map(shift => `
                         <div class="swipeable-container">
                             <div class="swipe-background">
@@ -4420,17 +5046,35 @@
                                     <span>Edit</span>
                                 </button>
                             </div>
-                            <div class="day-shift-item swipeable-item" style="background-color: var(--card-bg);">
-                                <div class="shift-details">
-                                    <div class="shift-project" title="${SecurityUtils.escapeHtml(shift.project)}">
-                                        ${SecurityUtils.escapeHtml(shift.project)}
+                            <div class="day-shift-item-container swipeable-item" style="background-color: transparent; padding: 0; box-shadow: var(--shadow); border-radius: var(--border-radius); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color);">
+                                <div class="shift-item" style="border: none; box-shadow: none; margin-bottom: 0; border-radius: 0;">
+                                    <div class="shift-date-container">
+                                        <div class="${dateCircleClass}">
+                                            <div class="shift-day-number">${shiftDate.getDate()}</div>
+                                            <div class="shift-day-name">${DateUtils.getDayName(shiftDate, 'short')}</div>
+                                        </div>
                                     </div>
-                                    <div class="shift-task">${SecurityUtils.escapeHtml(shift.task)}</div>
+                                    <div class="shift-details">
+                                        <div class="shift-project" title="${SecurityUtils.escapeHtml(shift.project)}">
+                                            ${SecurityUtils.escapeHtml(shift.project)}
+                                        </div>
+                                        <div class="shift-task" title="${SecurityUtils.escapeHtml(shift.task)}">
+                                            ${SecurityUtils.escapeHtml(shift.task)}
+                                        </div>
+                                        ${shift.notes ? `<div class="shift-notes">${SecurityUtils.escapeHtml(shift.notes)}</div>` : ''}
+                                    </div>
+                                    <div class="task-icon-large">
+                                        <i class="fas ${UI.getTaskIcon(shift.task)}"></i>
+                                    </div>
                                 </div>
-                                ${shift.notes ? `<div class="day-shift-notes">${SecurityUtils.escapeHtml(shift.notes)}</div>` : ''}
-                            </div>
-                            <div class="task-icon-large">
-                                <i class="fas ${UI.getTaskIcon(shift.task)}"></i>
+                                <div class="desktop-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; background-color: var(--card-bg); border-top: 1px solid var(--border-color);">
+                                    <button class="btn btn-outline" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 4px;" onclick="event.stopPropagation(); window.app.openEditShiftModal(${shift.id})" title="Edit Shift">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-danger" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 4px;" onclick="event.stopPropagation(); window.app.deleteShift(${shift.id})" title="Delete Shift">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `).join('');
@@ -4528,6 +5172,7 @@
                     shifts: this.state.shifts,
                     projects: this.state.projects,
                     tasks: this.state.tasks,
+                    lists: this.state.lists,
                     paymentPeriods: this.state.paymentPeriods,
                     exportDate: new Date().toISOString(),
                     version: '1.0'
@@ -4602,6 +5247,11 @@
                             this.state.projects = data.projects;
                             this.state.tasks = data.tasks;
                             this.state.paymentPeriods = data.paymentPeriods;
+                            if (data.lists && Array.isArray(data.lists)) {
+                                this.state.lists = data.lists;
+                            } else {
+                                this.state.lists = [];
+                            }
 
                             this.state.saveToLocalStorage();
                             this.state.invalidateCache();
@@ -4613,6 +5263,7 @@
                             this.renderCalendarWeek();
                             this.renderCalendarShifts();
                             this.updateSummary();
+                            this.renderLists();
 
                             UI.showToast('Data imported successfully!', 'success');
                         });
@@ -4641,6 +5292,33 @@
                         this.updateSummary();
                     });
                 }
+
+                // List Filter & Add
+                if (this.elements.listFilterProject) {
+                    this.elements.listFilterProject.addEventListener('change', () => {
+                        this.renderLists();
+                    });
+                }
+                if (this.elements.addListItemBtn) {
+                    this.elements.addListItemBtn.addEventListener('click', () => {
+                        this.addListItem();
+                    });
+                }
+                if (this.elements.newListItemText) {
+                    this.elements.newListItemText.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.addListItem();
+                        }
+                    });
+                }
+
+                // Tab Switching
+                this.elements.tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.switchTab(tab.getAttribute('data-tab'));
+                    });
+                });
 
                 // Theme toggle
                 // Removed themeToggle event listener as per instruction.
