@@ -28,6 +28,8 @@
             --secondary: #0F172A;
             --success: #059669;
             --warning: #DC2626;
+            --today: #D97706;
+            --danger: #DC2626;
             --text-main: #0F172A;
             --text-muted: #64748B;
             --bg-body: #F1F5F9;
@@ -57,7 +59,6 @@
             --element-height-sm: 36px;
             --element-height-lg: 52px;
 
-            --border-radius: 6px;
             --border-radius-sm: 4px;
             --border-radius-lg: 8px;
 
@@ -5057,7 +5058,7 @@
 
                 // Show undo toast instead of confirm dialog
                 UI.showUndoToast('Shift deleted', () => {
-                    this.state.shifts.splice(shiftIndex, 0, deletedShift);
+                    this.state.shifts.push(deletedShift);
                     this.state.saveToLocalStorage();
                     this.state.invalidateCache();
                     this.paymentCalculator.invalidateCache();
@@ -5735,7 +5736,7 @@
                 HapticUtils.deleteFeedback();
 
                 UI.showUndoToast('Item deleted', () => {
-                    this.state.lists.splice(itemIndex, 0, deletedItem);
+                    this.state.lists.push(deletedItem);
                     this.state.saveToLocalStorage();
                     this.renderLists();
                     this.renderCalendarShifts();
@@ -6087,7 +6088,14 @@
                             }));
                             this.state.projects = data.projects.map(p => SecurityUtils.sanitizeInput(String(p), 50));
                             this.state.tasks = data.tasks.map(t => SecurityUtils.sanitizeInput(String(t), 50));
-                            this.state.paymentPeriods = data.paymentPeriods;
+                            this.state.paymentPeriods = data.paymentPeriods.map(p => ({
+                                ...p,
+                                amount: parseFloat(p.amount) || 0,
+                                description: SecurityUtils.sanitizeInput(String(p.description || ''), 200),
+                                startDate: String(p.startDate || ''),
+                                endDate: String(p.endDate || ''),
+                                status: p.status === 'paid' ? 'paid' : 'pending'
+                            }));
                             if (data.lists && Array.isArray(data.lists)) {
                                 this.state.lists = data.lists.map(item => ({
                                     ...item,
