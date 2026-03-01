@@ -2714,9 +2714,11 @@
             cursor: grabbing;
         }
 
-        .list-item-row.drag-over {
-            border-top: 2px solid var(--primary);
-            margin-top: -2px;
+        .list-item-row.drag-over,
+        .list-item.drag-over {
+            border-top: 3px solid var(--primary);
+            margin-top: -3px;
+            background: rgba(67, 97, 238, 0.08);
         }
 
         .list-item-row.dragging {
@@ -5506,31 +5508,152 @@
                 this.setupListDragDrop();
             }
 
-            // Feature: Drag & Drop for list items
+            // Feature: Touch-friendly Drag & Drop for list items
             setupListDragDrop() {
                 const items = this.elements.listsContainer.querySelectorAll('.list-item[draggable]');
+                let draggedEl = null;
                 let draggedId = null;
+                let clone = null;
+                let longPressTimer = null;
+                let isDragging = false;
+                let startY = 0;
+                const LONG_PRESS_MS = 300;
+
+                const getItemAtPoint = (x, y) => {
+                    // Hide clone temporarily to detect element underneath
+                    if (clone) clone.style.display = 'none';
+                    const el = document.elementFromPoint(x, y);
+                    if (clone) clone.style.display = '';
+                    return el ? el.closest('.list-item[data-item-id]') : null;
+                };
+
+                const startDrag = (item, clientY) => {
+                    isDragging = true;
+                    draggedEl = item;
+                    draggedId = parseInt(item.getAttribute('data-item-id'));
+                    startY = clientY;
+
+                    // Create floating clone
+                    clone = item.cloneNode(true);
+                    clone.style.cssText = `
+                        position: fixed;
+                        left: ${item.getBoundingClientRect().left}px;
+                        top: ${item.getBoundingClientRect().top}px;
+                        width: ${item.offsetWidth}px;
+                        z-index: 9999;
+                        opacity: 0.9;
+                        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+                        transform: scale(1.03);
+                        pointer-events: none;
+                        border: 2px solid var(--primary);
+                        border-radius: var(--border-radius);
+                        background: var(--card-bg);
+                        transition: none;
+                    `;
+                    document.body.appendChild(clone);
+
+                    item.style.opacity = '0.3';
+                    HapticUtils.tap();
+                };
+
+                const moveDrag = (clientY) => {
+                    if (!isDragging || !clone) return;
+                    const deltaY = clientY - startY;
+                    const origTop = draggedEl.getBoundingClientRect().top - deltaY + deltaY;
+                    clone.style.top = `${clientY - clone.offsetHeight / 2}px`;
+
+                    // Highlight drop target
+                    items.forEach(i => i.classList.remove('drag-over'));
+                    const targetEl = getItemAtPoint(clone.getBoundingClientRect().left + 20, clientY);
+                    if (targetEl && targetEl !== draggedEl) {
+                        targetEl.classList.add('drag-over');
+                    }
+                };
+
+                const endDrag = (clientY) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+
+                    // Find drop target
+                    const targetEl = getItemAtPoint(
+                        draggedEl.getBoundingClientRect().left + 20,
+                        clientY
+                    );
+
+                    if (targetEl && targetEl !== draggedEl) {
+                        const targetId = parseInt(targetEl.getAttribute('data-item-id'));
+                        const fromIndex = this.state.lists.findIndex(i => i.id === draggedId);
+                        const toIndex = this.state.lists.findIndex(i => i.id === targetId);
+                        if (fromIndex !== -1 && toIndex !== -1) {
+                            const [movedItem] = this.state.lists.splice(fromIndex, 1);
+                            this.state.lists.splice(toIndex, 0, movedItem);
+                            this.state.saveToLocalStorage();
+                            HapticUtils.tap();
+                        }
+                    }
+
+                    // Cleanup
+                    if (clone) { clone.remove(); clone = null; }
+                    if (draggedEl) draggedEl.style.opacity = '';
+                    items.forEach(i => i.classList.remove('drag-over'));
+                    draggedEl = null;
+                    draggedId = null;
+                    this.renderLists();
+                };
+
+                const cancelDrag = () => {
+                    clearTimeout(longPressTimer);
+                    if (!isDragging) return;
+                    isDragging = false;
+                    if (clone) { clone.remove(); clone = null; }
+                    if (draggedEl) draggedEl.style.opacity = '';
+                    items.forEach(i => i.classList.remove('drag-over'));
+                    draggedEl = null;
+                    draggedId = null;
+                };
 
                 items.forEach(item => {
+                    // Touch: long-press to start drag
+                    item.addEventListener('touchstart', (e) => {
+                        const touch = e.touches[0];
+                        longPressTimer = setTimeout(() => {
+                            e.preventDefault();
+                            startDrag(item, touch.clientY);
+                        }, LONG_PRESS_MS);
+                    }, { passive: false });
+
+                    item.addEventListener('touchmove', (e) => {
+                        clearTimeout(longPressTimer);
+                        if (isDragging) {
+                            e.preventDefault();
+                            moveDrag(e.touches[0].clientY);
+                        }
+                    }, { passive: false });
+
+                    item.addEventListener('touchend', (e) => {
+                        clearTimeout(longPressTimer);
+                        if (isDragging) {
+                            e.preventDefault();
+                            const touch = e.changedTouches[0];
+                            endDrag(touch.clientY);
+                        }
+                    });
+
+                    item.addEventListener('touchcancel', () => cancelDrag());
+
+                    // Mouse: drag events for desktop
                     item.addEventListener('dragstart', (e) => {
                         draggedId = parseInt(item.getAttribute('data-item-id'));
                         item.classList.add('dragging');
                         e.dataTransfer.effectAllowed = 'move';
-                        e.dataTransfer.setData('text/plain', draggedId);
                     });
 
                     item.addEventListener('dragover', (e) => {
                         e.preventDefault();
-                        e.dataTransfer.dropEffect = 'move';
-                        // Remove drag-over from all, add to current
                         items.forEach(i => i.classList.remove('drag-over'));
                         if (parseInt(item.getAttribute('data-item-id')) !== draggedId) {
                             item.classList.add('drag-over');
                         }
-                    });
-
-                    item.addEventListener('dragleave', () => {
-                        item.classList.remove('drag-over');
                     });
 
                     item.addEventListener('drop', (e) => {
@@ -5538,17 +5661,15 @@
                         items.forEach(i => i.classList.remove('drag-over'));
                         const targetId = parseInt(item.getAttribute('data-item-id'));
                         if (draggedId === targetId) return;
-
-                        // Reorder in state.lists
                         const fromIndex = this.state.lists.findIndex(i => i.id === draggedId);
                         const toIndex = this.state.lists.findIndex(i => i.id === targetId);
-                        if (fromIndex === -1 || toIndex === -1) return;
-
-                        const [movedItem] = this.state.lists.splice(fromIndex, 1);
-                        this.state.lists.splice(toIndex, 0, movedItem);
-                        this.state.saveToLocalStorage();
-                        this.renderLists();
-                        HapticUtils.tap();
+                        if (fromIndex !== -1 && toIndex !== -1) {
+                            const [movedItem] = this.state.lists.splice(fromIndex, 1);
+                            this.state.lists.splice(toIndex, 0, movedItem);
+                            this.state.saveToLocalStorage();
+                            this.renderLists();
+                            HapticUtils.tap();
+                        }
                     });
 
                     item.addEventListener('dragend', () => {
