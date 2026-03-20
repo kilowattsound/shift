@@ -1,0 +1,16 @@
+{
+  "name": "Shift Tracker",
+  "short_name": "Shift",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1e293b",
+  "description": "Professional tool for tracking construction shifts and earnings.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
